@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu RM PANGKALAN - Pesan Mandiri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-pop { animation: pop 0.3s ease-out; }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-32">
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-slate-100 shadow-sm">
+        <div class="px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200">
+                    <i class="fas fa-utensils text-slate-900 text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-slate-800 leading-none">RM PANGKALAN</h1>
+                    <span id="table-display" class="text-[10px] font-bold text-amber-600 uppercase tracking-tighter">MEJA: MEMUAT...</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSearch()" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                    <i class="fas fa-search"></i>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar (Hidden by default) -->
+        <div id="search-container" class="hidden px-4 pb-4 animate-fadeIn">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Cari masakan favorit..." class="w-full pl-11 pr-4 py-3 bg-slate-100 rounded-xl border-none focus:ring-2 focus:ring-amber-400 text-sm">
+            </div>
+        </div>
+
+        <!-- Category Scroll -->
+        <div class="flex overflow-x-auto no-scrollbar gap-2 px-4 pb-3 mt-1">
+            <button onclick="setCategory('Semua')" class="cat-btn whitespace-nowrap bg-slate-900 text-white px-5 py-2 rounded-full text-[11px] font-bold transition-all shadow-md shadow-slate-200" data-category="Semua">Semua</button>
+            <button onclick="setCategory('Makanan')" class="cat-btn whitespace-nowrap bg-white text-slate-500 border border-slate-100 px-5 py-2 rounded-full text-[11px] font-bold transition-all" data-category="Makanan">Makanan</button>
+            <button onclick="setCategory('Minuman')" class="cat-btn whitespace-nowrap bg-white text-slate-500 border border-slate-100 px-5 py-2 rounded-full text-[11px] font-bold transition-all" data-category="Minuman">Minuman</button>
+            <button onclick="setCategory('Paket')" class="cat-btn whitespace-nowrap bg-white text-slate-500 border border-slate-100 px-5 py-2 rounded-full text-[11px] font-bold transition-all" data-category="Paket">Paket Hemat</button>
+            <button onclick="setCategory('Camilan')" class="cat-btn whitespace-nowrap bg-white text-slate-500 border border-slate-100 px-5 py-2 rounded-full text-[11px] font-bold transition-all" data-category="Camilan">Camilan</button>
+        </div>
+    </header>
+
+    <!-- Content Section -->
+    <main class="mt-4 px-2 lg:px-4">
+        <!-- Promo Card -->
+        <div class="px-2 mb-6">
+            <div class="bg-gradient-to-br from-indigo-900 to-slate-800 rounded-2xl p-5 text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="bg-amber-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Spesial Hari Ini</span>
+                    <h2 class="text-lg font-extrabold mt-2 leading-tight">Ayam Bakar Madu<br>Pangkalan</h2>
+                    <p class="text-[10px] opacity-70 mt-1">Cita rasa khas dengan madu hutan asli.</p>
+                    <button class="mt-4 bg-white text-slate-900 px-4 py-1.5 rounded-lg text-[11px] font-bold">Pesan Sekarang</button>
+                </div>
+                <i class="fas fa-drumstick-bite absolute -right-4 -bottom-4 text-8xl opacity-10"></i>
+            </div>
+        </div>
+
+        <!-- Menu Grid -->
+        <div id="menu-container" class="grid grid-cols-1 gap-3">
+            <!-- Items will be injected here -->
+        </div>
+    </main>
+
+    <!-- Floating Checkout Bar -->
+    <div id="cart-bar" class="fixed bottom-6 left-4 right-4 z-50 transform translate-y-32 transition-transform duration-500">
+        <div class="bg-slate-900 rounded-2xl p-4 shadow-2xl flex items-center justify-between border border-slate-800">
+            <div class="flex items-center gap-4">
+                <div id="cart-icon" class="w-11 h-11 bg-amber-400 rounded-xl flex items-center justify-center text-slate-900">
+                    <i class="fas fa-shopping-basket text-lg"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-bold w-5 h-5 rounded-full border-2 border-slate-900 flex items-center justify-center">0</span>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pesanan</p>
+                    <p id="cart-total-display" class="text-base font-black text-white leading-none">Rp 0</p>
+                </div>
+            </div>
+            <button onclick="openCartModal()" class="bg-white text-slate-900 px-6 py-3 rounded-xl font-extrabold text-xs shadow-lg active:scale-95 transition-all">
+                LIHAT PESANAN
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Modal (Overlay) -->
+    <div id="cart-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onclick="closeCartModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 max-h-[85vh] flex flex-col shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
+            
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-extrabold text-slate-800">Detail Pesanan</h3>
+                <span id="modal-table" class="text-xs font-bold text-amber-500">Meja 05</span>
+            </div>
+
+            <div id="modal-items-list" class="flex-1 overflow-y-auto space-y-4 pr-2">
+                <!-- Items list injected here -->
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 space-y-3">
+                <div class="flex justify-between items-center text-sm font-bold text-slate-400">
+                    <span>Subtotal</span>
+                    <span id="modal-subtotal" class="text-slate-700 font-black">Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-extrabold text-slate-800">Total Akhir</span>
+                    <span id="modal-total" class="text-xl font-black text-amber-600">Rp 0</span>
+                </div>
+                <button onclick="confirmOrder()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm mt-4 shadow-xl active:scale-[0.98] transition-all">
+                    KONFIRMASI & PESAN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Section -->
+    <script>
+        // Mock Data Menu
+        const menuItems = [
+            { id: 1, name: "Ayam Bakar Spesial", price: 25000, category: "Makanan", desc: "Ayam bakar bumbu rempah dengan sambal terasi.", stock: 20 },
+            { id: 2, name: "Nasi Goreng Pangkalan", price: 20000, category: "Makanan", desc: "Nasi goreng telor ceplok + kerupuk.", stock: 15 },
+            { id: 3, name: "Es Teh Manis", price: 5000, category: "Minuman", desc: "Teh seduh segar dengan gula asli.", stock: 100 },
+            { id: 4, name: "Es Jeruk Peras", price: 8000, category: "Minuman", desc: "Jeruk peras murni tanpa pengawet.", stock: 50 },
+            { id: 5, name: "Paket Berdua", price: 45000, category: "Paket", desc: "2 Ayam Bakar + 2 Nasi + 2 Es Teh.", stock: 10 },
+            { id: 6, name: "Tempe Mendoan", price: 10000, category: "Camilan", desc: "Tempe goreng tepung isi 3 pcs.", stock: 30 }
+        ];
+
+        let cart = [];
+        let currentCategory = "Semua";
+
+        // Initialize
+        window.onload = () => {
+            // Ambil nomor meja dari URL: ?meja=05
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableNum = urlParams.get('meja') || "Umum";
+            document.getElementById('table-display').innerText = `MEJA: ${tableNum}`;
+            document.getElementById('modal-table').innerText = `Meja ${tableNum}`;
+            
+            renderMenu();
+            loadCart();
+        };
+
+        function renderMenu(filterTerm = "") {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = "";
+
+            const filtered = menuItems.filter(item => {
+                const matchCat = currentCategory === "Semua" || item.category === currentCategory;
+                const matchSearch = item.name.toLowerCase().includes(filterTerm.toLowerCase());
+                return matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10">
+                        <i class="fas fa-search text-4xl text-slate-200 mb-3"></i>
+                        <p class="text-sm font-bold text-slate-400">Menu tidak ditemukan</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-2xl border border-slate-100 flex items-center gap-4 active:bg-slate-50 transition-colors shadow-sm";
+                div.innerHTML = `
+                    <div class="w-20 h-20 bg-slate-100 rounded-xl flex-shrink-0 flex items-center justify-center text-slate-300">
+                        <i class="fas fa-image text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-sm font-bold text-slate-800 leading-tight">${item.name}</h4>
+                            <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded uppercase">${item.category}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1 line-clamp-1">${item.desc}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-sm font-black text-slate-800">Rp ${item.price.toLocaleString()}</span>
+                            <button onclick="addToCart(${item.id})" class="w-8 h-8 bg-amber-400 text-slate-900 rounded-lg flex items-center justify-center shadow-lg shadow-amber-200 active:scale-90 transition-all">
+                                <i class="fas fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.category === cat) {
+                    btn.className = "cat-btn whitespace-nowrap bg-slate-900 text-white px-5 py-2 rounded-full text-[11px] font-bold shadow-md shadow-slate-200";
+                } else {
+                    btn.className = "cat-btn whitespace-nowrap bg-white text-slate-500 border border-slate-100 px-5 py-2 rounded-full text-[11px] font-bold transition-all";
+                }
+            });
+            renderMenu();
+        }
+
+        function toggleSearch() {
+            const container = document.getElementById('search-container');
+            container.classList.toggle('hidden');
+            if(!container.classList.contains('hidden')) {
+                document.getElementById('menu-search').focus();
+            }
+        }
+
+        function filterMenu() {
+            const term = document.getElementById('menu-search').value;
+            renderMenu(term);
+        }
+
+        // Cart Logic
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            const inCart = cart.find(i => i.id === id);
+
+            if (inCart) {
+                inCart.qty++;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+
+            updateCartUI();
+            saveCart();
+            
+            // Animation Feedback
+            const icon = document.getElementById('cart-icon');
+            icon.classList.add('animate-pop');
+            setTimeout(() => icon.classList.remove('animate-pop'), 300);
+        }
+
+        function updateCartUI() {
+            const bar = document.getElementById('cart-bar');
+            const totalQty = cart.reduce((acc, curr) => acc + curr.qty, 0);
+            const totalPrice = cart.reduce((acc, curr) => acc + (curr.qty * curr.price), 0);
+
+            if (totalQty > 0) {
+                bar.classList.remove('translate-y-32');
+            } else {
+                bar.classList.add('translate-y-32');
+            }
+
+            document.getElementById('cart-badge').innerText = totalQty;
+            document.getElementById('cart-total-display').innerText = `Rp ${totalPrice.toLocaleString()}`;
+        }
+
+        function openCartModal() {
+            const list = document.getElementById('modal-items-list');
+            list.innerHTML = "";
+
+            cart.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between border-b border-slate-50 pb-4";
+                div.innerHTML = `
+                    <div class="flex-1">
+                        <h5 class="text-sm font-bold text-slate-800">${item.name}</h5>
+                        <p class="text-[11px] text-slate-400">Rp ${item.price.toLocaleString()}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="changeQty(${index}, -1)" class="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 active:scale-90"><i class="fas fa-minus text-[10px]"></i></button>
+                        <span class="text-sm font-bold text-slate-800 w-4 text-center">${item.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 active:scale-90"><i class="fas fa-plus text-[10px]"></i></button>
+                    </div>
+                    <div class="ml-4 text-right min-w-[70px]">
+                        <p class="text-sm font-black text-slate-800">Rp ${(item.price * item.qty).toLocaleString()}</p>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            const totalPrice = cart.reduce((acc, curr) => acc + (curr.qty * curr.price), 0);
+            document.getElementById('modal-subtotal').innerText = `Rp ${totalPrice.toLocaleString()}`;
+            document.getElementById('modal-total').innerText = `Rp ${totalPrice.toLocaleString()}`;
+
+            document.getElementById('cart-modal').classList.remove('hidden');
+        }
+
+        function closeCartModal() {
+            document.getElementById('cart-modal').classList.add('hidden');
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            if (cart.length === 0) closeCartModal();
+            updateCartUI();
+            openCartModal(); // Refresh modal view
+            saveCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('customer_cart', JSON.stringify(cart));
+        }
+
+        function loadCart() {
+            const saved = localStorage.getItem('customer_cart');
+            if (saved) {
+                cart = JSON.parse(saved);
+                updateCartUI();
+            }
+        }
+
+        async function confirmOrder() {
+            if (cart.length === 0) return;
+            
+            // Animasi loading sederhana
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-circle-notch animate-spin"></i> Memproses...`;
+            btn.disabled = true;
+
+            const order = {
+                id: 'ORD-' + Date.now(),
+                table: document.getElementById('table-display').innerText.split(": ")[1],
+                items: cart,
+                total: cart.reduce((acc, curr) => acc + (curr.qty * curr.price), 0),
+                status: 'Menunggu',
+                timestamp: new Date().toISOString()
+            };
+
+            // Simpan ke antrean lokal (seperti POS)
+            const pending = JSON.parse(localStorage.getItem('pending_orders') || '[]');
+            pending.push(order);
+            localStorage.setItem('pending_orders', JSON.stringify(pending));
+
+            // Simulasi delay pengiriman
+            setTimeout(() => {
+                alert(`Pesanan #${order.id} berhasil dikirim ke dapur! Mohon tunggu di meja Anda.`);
+                cart = [];
+                saveCart();
+                updateCartUI();
+                closeCartModal();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
