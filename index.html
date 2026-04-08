@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM PANGKALAN - Premium POS System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .nav-active { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fbbf24;
+            border-right: 4px solid #fbbf24;
+        }
+
+        #content-area { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fade-out { opacity: 0; transform: translateY(10px); }
+        
+        /* Mobile Adjustments */
+        @media (max-width: 640px) {
+            .mobile-min-padding { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+            .sidebar-closed { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-hidden">
+
+    <!-- Top Connection Status Bar -->
+    <div id="offline-indicator" class="hidden bg-rose-600 text-white text-[10px] uppercase tracking-widest text-center py-1 font-bold z-50 sticky top-0">
+        <i class="fas fa-wifi-slash mr-1"></i> Mode Offline: Data disimpan secara lokal
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 lg:relative lg:translate-x-0 sidebar-closed">
+            <div class="flex flex-col h-full">
+                <!-- Brand Logo -->
+                <div class="p-6 flex items-center space-x-3 border-b border-slate-800">
+                    <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                        <i class="fas fa-utensils text-slate-900 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white leading-none tracking-tight">RM PANGKALAN</h1>
+                        <span class="text-[10px] text-slate-500 uppercase font-semibold">Premium POS v2.0</span>
+                    </div>
+                </div>
+
+                <!-- Menu Items -->
+                <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+                    <!-- Group 1: Utama -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Utama</p>
+                        <div class="space-y-1">
+                            <button onclick="navigate('dashboard.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-chart-pie w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Dashboard</span>
+                            </button>
+                            <button onclick="navigate('pos.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-cash-register w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Kasir / Transaksi</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group 2: Management -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Manajemen</p>
+                        <div class="space-y-1">
+                            <button onclick="navigate('admin.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-boxes-stacked w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Inventori Stok</span>
+                            </button>
+                            <button onclick="navigate('pegawai.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-user-tie w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Pegawai & Absensi</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group 3: Laporan -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Laporan</p>
+                        <div class="space-y-1">
+                            <button onclick="navigate('laporan.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-file-invoice-dollar w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Rekap Penjualan</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Footer Sidebar / User Profile -->
+                <div class="p-4 bg-slate-950/50">
+                    <div class="flex items-center p-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-900 font-bold shadow-inner">
+                            A
+                        </div>
+                        <div class="ml-3 overflow-hidden">
+                            <p class="text-xs font-bold text-white truncate">Administrator</p>
+                            <p class="text-[10px] text-slate-500 truncate">admin@pangkalan.com</p>
+                        </div>
+                        <button class="ml-auto text-slate-500 hover:text-white">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
+            
+            <!-- Main Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 z-30">
+                <div class="flex items-center space-x-4">
+                    <!-- Mobile Menu Toggle -->
+                    <button onclick="toggleSidebar()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <div class="hidden sm:block">
+                        <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard</h2>
+                        <p id="page-subtitle" class="text-[10px] text-slate-400 uppercase font-medium tracking-wider">Ringkasan Operasional Hari Ini</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 lg:space-x-6">
+                    <!-- Real Time Clock -->
+                    <div class="hidden md:flex flex-col items-end border-r border-slate-200 pr-6">
+                        <span id="real-time-clock" class="text-sm font-bold text-slate-700 leading-none">00:00:00</span>
+                        <span id="real-time-date" class="text-[10px] text-slate-400 font-medium mt-1">Kamis, 12 Okt 2023</span>
+                    </div>
+
+                    <!-- Connection Status -->
+                    <div id="sync-badge" class="flex items-center bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-bold border border-emerald-100 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+                        ONLINE
+                    </div>
+
+                    <div class="flex items-center space-x-1">
+                        <button class="w-10 h-10 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="w-10 h-10 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Content Area -->
+            <!-- max-w-[1600px] ensures it doesn't look too stretched on ultrawide monitors -->
+            <main class="flex-1 overflow-y-auto relative bg-slate-50/50">
+                <div class="max-w-[1600px] mx-auto p-4 lg:p-8 mobile-min-padding">
+                    <div id="content-area">
+                        <!-- Content injection point -->
+                        <div class="flex flex-col items-center justify-center h-[60vh] text-slate-400">
+                            <div class="w-16 h-16 border-4 border-slate-200 border-t-amber-400 rounded-full animate-spin mb-4"></div>
+                            <p class="text-sm font-medium animate-pulse">Menyiapkan Dashboard...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden lg:hidden"></div>
+
+    <script>
+        /**
+         * Sidebar Toggle for Mobile
+         */
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('sidebar-closed');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        /**
+         * Navigation with Smooth Transition
+         */
+        async function navigate(pageUrl, element) {
+            const contentArea = document.getElementById('content-area');
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+            
+            // Mobile auto-close sidebar
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (!sidebar.classList.contains('sidebar-closed')) toggleSidebar();
+            }
+
+            // Effect: Fade Out
+            contentArea.classList.add('fade-out');
+
+            try {
+                const response = await fetch(pageUrl);
+                if (!response.ok) throw new Error('Halaman tidak ditemukan');
+                
+                const html = await response.text();
+                
+                setTimeout(() => {
+                    contentArea.innerHTML = html;
+                    
+                    // Update Header Info
+                    const btnText = element.querySelector('span').innerText;
+                    pageTitle.innerText = btnText;
+                    
+                    // Dynamic Subtitle based on page
+                    const subtitles = {
+                        'Dashboard': 'Ringkasan Operasional Hari Ini',
+                        'Kasir / Transaksi': 'Sistem Input Pesanan Cepat',
+                        'Inventori Stok': 'Manajemen Bahan & Barang',
+                        'Pegawai & Absensi': 'Kelola Kinerja Tim',
+                        'Rekap Penjualan': 'Analisis Pendapatan Berkala'
+                    };
+                    pageSubtitle.innerText = subtitles[btnText] || 'RM PANGKALAN System';
+
+                    contentArea.classList.remove('fade-out');
+                    
+                    // Update Active State
+                    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
+                    element.classList.add('nav-active');
+
+                    localStorage.setItem('last_page', pageUrl);
+                }, 300);
+
+            } catch (error) {
+                console.error('Navigation error:', error);
+                contentArea.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-[60vh] text-center">
+                        <div class="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4">
+                            <i class="fas fa-exclamation-triangle text-3xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Gagal Memuat Halaman</h2>
+                        <p class="text-slate-500 max-w-xs mt-2 text-sm">Pastikan Anda memiliki koneksi internet atau halaman ini sudah tersimpan dalam cache.</p>
+                        <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold">Coba Lagi</button>
+                    </div>`;
+                contentArea.classList.remove('fade-out');
+            }
+        }
+
+        /**
+         * Real Time Clock
+         */
+        function startClock() {
+            const clockEl = document.getElementById('real-time-clock');
+            const dateEl = document.getElementById('real-time-date');
+            
+            setInterval(() => {
+                const now = new Date();
+                clockEl.innerText = now.toLocaleTimeString('id-ID', { hour12: false });
+                
+                const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+                dateEl.innerText = now.toLocaleDateString('id-ID', options);
+            }, 1000);
+        }
+
+        /**
+         * Connection Monitoring
+         */
+        function updateConnectionUI() {
+            const offlineIndicator = document.getElementById('offline-indicator');
+            const syncBadge = document.getElementById('sync-badge');
+
+            if (navigator.onLine) {
+                offlineIndicator.classList.add('hidden');
+                syncBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> ONLINE`;
+                syncBadge.className = "flex items-center bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-bold border border-emerald-100 shadow-sm";
+            } else {
+                offlineIndicator.classList.remove('hidden');
+                syncBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400 mr-2"></span> OFFLINE`;
+                syncBadge.className = "flex items-center bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full text-[10px] font-bold border border-slate-200 shadow-sm";
+            }
+        }
+
+        window.addEventListener('online', updateConnectionUI);
+        window.addEventListener('offline', updateConnectionUI);
+
+        /**
+         * Initial Load
+         */
+        window.onload = () => {
+            startClock();
+            updateConnectionUI();
+            
+            const lastPage = localStorage.getItem('last_page') || 'dashboard.html';
+            const defaultBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.getAttribute('onclick').includes(lastPage)) || document.querySelector('.nav-btn');
+            
+            if (defaultBtn) navigate(lastPage, defaultBtn);
+            
+            // Register SW for Offline
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            }
+        };
+    </script>
+</body>
+</html>

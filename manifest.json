@@ -1,0 +1,17 @@
+{
+  "name": "RM PANGKALAN POS",
+  "short_name": "PangkalanPOS",
+  "description": "Sistem Kasir Modern RM Pangkalan",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#fbbf24",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/192/192401.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
