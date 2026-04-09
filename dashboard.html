@@ -1,0 +1,113 @@
+<div class="space-y-8 animate-fadeIn">
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 mb-4">
+                <i class="fas fa-wallet text-xl"></i>
+            </div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Omzet Hari Ini</p>
+            <h3 id="dash-omzet" class="text-xl font-black text-slate-800 mt-1 font-mono">Rp 0</h3>
+        </div>
+
+        <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-500 mb-4">
+                <i class="fas fa-receipt text-xl"></i>
+            </div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Transaksi</p>
+            <h3 id="dash-transaksi" class="text-xl font-black text-slate-800 mt-1">0 Pesanan</h3>
+        </div>
+
+        <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mb-4">
+                <i class="fas fa-utensils text-xl"></i>
+            </div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Menu Aktif</p>
+            <h3 id="dash-menu" class="text-xl font-black text-slate-800 mt-1">0 Item</h3>
+        </div>
+
+        <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-4">
+                <i class="fas fa-bell text-xl"></i>
+            </div>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Meja Aktif</p>
+            <h3 id="dash-meja" class="text-xl font-black text-slate-800 mt-1">0 Antrean</h3>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-8">
+                <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest">Aktivitas Terakhir</h4>
+                <button onclick="navigate('laporan.html', document.querySelector('[onclick*=\'laporan.html\']'))" class="text-[10px] font-black text-amber-500 uppercase">Lihat Semua</button>
+            </div>
+            <div id="dash-recent-list" class="space-y-4">
+                <!-- List pesanan terakhir -->
+                <p class="text-center py-10 text-slate-300 text-[10px] font-bold uppercase tracking-widest">Memuat data terbaru...</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 p-8 rounded-[40px] shadow-2xl shadow-slate-200 text-white">
+            <h4 class="text-sm font-black uppercase tracking-widest mb-8 text-amber-400">Pintasan Kasir</h4>
+            <div class="space-y-4">
+                <button onclick="navigate('pos.html', document.querySelector('[onclick*=\'pos.html\']'))" class="w-full flex items-center justify-between p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all group">
+                    <span class="text-xs font-bold uppercase">Buka Terminal POS</span>
+                    <i class="fas fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                <div class="pt-6 border-t border-white/5 mt-6">
+                    <p class="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-2">Status Server</p>
+                    <div class="flex items-center gap-2 text-emerald-400">
+                        <i class="fas fa-circle text-[8px] animate-pulse"></i>
+                        <span class="text-[10px] font-black uppercase">Connected to Cloud</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadDashboardData() {
+        const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+        
+        try {
+            // Ambil Data Pesanan
+            const resOrders = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getOrders' }) });
+            const resultOrders = await resOrders.json();
+            
+            // Ambil Data Menu
+            const resMenu = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMenu' }) });
+            const resultMenu = await resMenu.json();
+
+            if(resultOrders.status === 'success') {
+                const data = resultOrders.data;
+                const totalOmzet = data.reduce((a, b) => a + parseInt(b.total || 0), 0);
+                
+                document.getElementById('dash-omzet').innerText = `Rp ${totalOmzet.toLocaleString()}`;
+                document.getElementById('dash-transaksi').innerText = `${data.length} Pesanan`;
+                
+                // Render 3 pesanan terakhir
+                const recent = data.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 3);
+                const listEl = document.getElementById('dash-recent-list');
+                listEl.innerHTML = recent.map(ord => `
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                        <div>
+                            <p class="text-xs font-black text-slate-800 uppercase">#${ord.id}</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Meja ${ord.meja} • ${new Date(ord.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                        </div>
+                        <span class="text-xs font-black text-slate-800">Rp ${parseInt(ord.total).toLocaleString()}</span>
+                    </div>
+                `).join('');
+            }
+
+            if(resultMenu.status === 'success') {
+                document.getElementById('dash-menu').innerText = `${resultMenu.data.length} Item`;
+            }
+
+        } catch (e) {
+            console.error("Dashboard Sync Error");
+        }
+    }
+
+    loadDashboardData();
+</script>
