@@ -1,0 +1,93 @@
+<div class="space-y-8 animate-fadeIn">
+    <!-- Header Page -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Inventori & Kontrol Stok</h3>
+            <p class="text-xs font-bold text-slate-400 mt-1">Kelola ketersediaan menu secara akurat</p>
+        </div>
+        <button onclick="loadStokData()" class="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] tracking-widest shadow-xl active:scale-95 transition-all uppercase">
+            <i class="fas fa-sync-alt"></i> Refresh Stok
+        </button>
+    </div>
+
+    <!-- Alert Section -->
+    <div id="stok-alert-container" class="hidden">
+        <div class="bg-rose-50 border border-rose-100 rounded-3xl p-4 flex items-center gap-4">
+            <div class="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shrink-0">
+                <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <p class="text-xs font-black text-rose-600 uppercase tracking-tight">Peringatan Stok</p>
+                <p id="stok-alert-msg" class="text-[10px] font-bold text-rose-400 uppercase mt-0.5">Ada menu yang sudah habis atau menipis.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- List Menu dengan Toggle Stok -->
+    <div class="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8" id="stok-grid">
+            <!-- Loading -->
+            <div class="animate-pulse bg-slate-50 h-32 rounded-3xl"></div>
+            <div class="animate-pulse bg-slate-50 h-32 rounded-3xl"></div>
+            <div class="animate-pulse bg-slate-50 h-32 rounded-3xl"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadStokData() {
+        const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+        const grid = document.getElementById('stok-grid');
+        
+        try {
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMenu' }) });
+            const result = await res.json();
+            
+            if(result.status === 'success') {
+                renderStokControl(result.data);
+                checkStokAlert(result.data);
+            }
+        } catch (e) {
+            grid.innerHTML = `<p class="col-span-full text-center py-10 font-bold text-rose-500">Gagal memuat data stok.</p>`;
+        }
+    }
+
+    function renderStokControl(data) {
+        const grid = document.getElementById('stok-grid');
+        grid.innerHTML = data.map(item => {
+            const isReady = item.stock == 'TRUE' || item.stock === true;
+            return `
+                <div class="p-5 rounded-[32px] border ${isReady ? 'border-slate-50 bg-slate-50/30' : 'border-rose-100 bg-rose-50/20'} flex items-center justify-between transition-all">
+                    <div class="flex items-center gap-4">
+                        <img src="${item.img || ''}" class="w-12 h-12 rounded-xl object-cover grayscale-${isReady ? '0' : '1'}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeD0iMyIgeT0iMyIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOSIgY3k9IjkiIHI9IjIiPjwvY2lyY2xlPjxwYXRoIGQ9Im0yMSAxNS0zLjA4Ni0zLjA4NmEyIDIgMCAwIDAtMi44MjggMEw2IDIxIj48L3BhdGg+PC9zdmc+';">
+                        <div>
+                            <p class="text-[11px] font-black text-slate-800 uppercase tracking-tight">${item.nama || item.name}</p>
+                            <p class="text-[9px] font-bold ${isReady ? 'text-emerald-500' : 'text-rose-500'} uppercase mt-0.5">${isReady ? 'Ready' : 'Sold Out'}</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleStok(${item.id}, ${!isReady})" class="w-12 h-6 rounded-full relative transition-all ${isReady ? 'bg-emerald-400' : 'bg-slate-200'}">
+                        <div class="absolute top-1 ${isReady ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all"></div>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function toggleStok(id, newStatus) {
+        // Logika update status stok ke Google Sheets bisa ditambahkan di code.gs
+        alert("Fitur Update Stok Real-time sedang menghubungkan ke Database...");
+    }
+
+    function checkStokAlert(data) {
+        const habis = data.filter(i => i.stock != 'TRUE' && i.stock !== true).length;
+        const container = document.getElementById('stok-alert-container');
+        if(habis > 0) {
+            container.classList.remove('hidden');
+            document.getElementById('stok-alert-msg').innerText = `${habis} Menu sedang habis. Segera perbarui ketersediaan.`;
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+
+    loadStokData();
+</script>
