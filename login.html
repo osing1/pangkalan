@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Staf - RM PANGKALAN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        .pin-dot { @apply w-4 h-4 rounded-full border-2 border-slate-200 transition-all duration-200; }
+        .pin-dot.filled { @apply bg-amber-400 border-amber-400 shadow-lg shadow-amber-200 scale-125; }
+        .keypad-btn { @apply w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-xl font-black text-slate-700 shadow-sm active:scale-90 active:bg-slate-50 transition-all; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .shake { animation: shake 0.3s ease-in-out 0s 2; }
+    </style>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-sm">
+        <!-- Branding -->
+        <div class="text-center mb-10">
+            <div class="w-20 h-20 bg-amber-400 rounded-[28px] flex items-center justify-center shadow-2xl shadow-amber-200 mx-auto mb-6">
+                <i class="fas fa-utensils text-slate-900 text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight uppercase">RM PANGKALAN</h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Sistem Otoritas Pegawai</p>
+        </div>
+
+        <!-- PIN Display -->
+        <div id="pin-container" class="flex justify-center gap-4 mb-12">
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="status-msg" class="text-center mb-8 h-4">
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Masukkan PIN Akses Anda</p>
+        </div>
+
+        <!-- Keypad Grid -->
+        <div class="grid grid-cols-3 gap-4 max-w-[260px] mx-auto">
+            <button onclick="pressKey('1')" class="keypad-btn">1</button>
+            <button onclick="pressKey('2')" class="keypad-btn">2</button>
+            <button onclick="pressKey('3')" class="keypad-btn">3</button>
+            <button onclick="pressKey('4')" class="keypad-btn">4</button>
+            <button onclick="pressKey('5')" class="keypad-btn">5</button>
+            <button onclick="pressKey('6')" class="keypad-btn">6</button>
+            <button onclick="pressKey('7')" class="keypad-btn">7</button>
+            <button onclick="pressKey('8')" class="keypad-btn">8</button>
+            <button onclick="pressKey('9')" class="keypad-btn">9</button>
+            <button onclick="clearPin()" class="keypad-btn text-rose-400"><i class="fas fa-trash-can text-sm"></i></button>
+            <button onclick="pressKey('0')" class="keypad-btn">0</button>
+            <button onclick="backspace()" class="keypad-btn text-slate-400"><i class="fas fa-backspace text-sm"></i></button>
+        </div>
+
+        <!-- Footer Action -->
+        <div class="mt-12 text-center">
+            <a href="index.html" class="text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
+            </a>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
+        <div class="w-12 h-12 border-4 border-slate-100 border-t-amber-400 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Memverifikasi...</p>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+        let currentPin = "";
+
+        function pressKey(num) {
+            if (currentPin.length < 6) {
+                currentPin += num;
+                updateDots();
+                if (currentPin.length === 6) {
+                    verifyLogin();
+                }
+            }
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach((dot, index) => {
+                if (index < currentPin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+        }
+
+        function clearPin() {
+            currentPin = "";
+            updateDots();
+        }
+
+        function backspace() {
+            currentPin = currentPin.slice(0, -1);
+            updateDots();
+        }
+
+        async function verifyLogin() {
+            const overlay = document.getElementById('loading-overlay');
+            const statusText = document.getElementById('status-msg');
+            const container = document.getElementById('pin-container');
+
+            overlay.classList.remove('hidden');
+
+            try {
+                // Ambil data semua pegawai dari Google Sheets
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'getPegawai' }) 
+                });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    // Cari pegawai yang PIN-nya cocok
+                    const user = result.data.find(p => p.pin == currentPin);
+
+                    if (user) {
+                        // Simpan sesi login di localStorage
+                        localStorage.setItem('user_session', JSON.stringify({
+                            id: user.id,
+                            nama: user.nama,
+                            role: user.posisi, // 'Owner', 'Kasir', 'Koki', 'Waiter'
+                            timestamp: new Date().getTime()
+                        }));
+
+                        statusText.innerHTML = `<p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Selamat Datang, ${user.nama}!</p>`;
+                        
+                        setTimeout(() => {
+                            window.location.href = "admin.html";
+                        }, 800);
+                    } else {
+                        throw new Error("PIN_SALAH");
+                    }
+                }
+            } catch (e) {
+                overlay.classList.add('hidden');
+                container.classList.add('shake');
+                statusText.innerHTML = `<p class="text-[10px] font-black text-rose-500 uppercase tracking-widest">PIN Salah atau Masalah Koneksi</p>`;
+                
+                setTimeout(() => {
+                    container.classList.remove('shake');
+                    clearPin();
+                }, 500);
+            }
+        }
+
+        // Hapus sesi lama saat buka login
+        localStorage.removeItem('user_session');
+    </script>
+</body>
+</html>
