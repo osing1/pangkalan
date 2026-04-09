@@ -26,7 +26,7 @@
     <!-- List Menu dengan Toggle Stok -->
     <div class="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8" id="stok-grid">
-            <!-- Loading -->
+            <!-- Loading Skeletons -->
             <div class="animate-pulse bg-slate-50 h-32 rounded-3xl"></div>
             <div class="animate-pulse bg-slate-50 h-32 rounded-3xl"></div>
             <div class="animate-pulse bg-slate-50 h-32 rounded-3xl"></div>
@@ -35,12 +35,16 @@
 </div>
 
 <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+
     async function loadStokData() {
-        const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
         const grid = document.getElementById('stok-grid');
         
         try {
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMenu' }) });
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'getMenu' }) 
+            });
             const result = await res.json();
             
             if(result.status === 'success') {
@@ -48,7 +52,7 @@
                 checkStokAlert(result.data);
             }
         } catch (e) {
-            grid.innerHTML = `<p class="col-span-full text-center py-10 font-bold text-rose-500">Gagal memuat data stok.</p>`;
+            grid.innerHTML = `<p class="col-span-full text-center py-10 font-bold text-rose-500 uppercase text-[10px]">Gagal memuat data stok dari Cloud.</p>`;
         }
     }
 
@@ -57,16 +61,20 @@
         grid.innerHTML = data.map(item => {
             const isReady = item.stock == 'TRUE' || item.stock === true;
             return `
-                <div class="p-5 rounded-[32px] border ${isReady ? 'border-slate-50 bg-slate-50/30' : 'border-rose-100 bg-rose-50/20'} flex items-center justify-between transition-all">
+                <div class="p-5 rounded-[32px] border ${isReady ? 'border-slate-100 bg-slate-50/30' : 'border-rose-100 bg-rose-50/20'} flex items-center justify-between transition-all group">
                     <div class="flex items-center gap-4">
-                        <img src="${item.img || ''}" class="w-12 h-12 rounded-xl object-cover grayscale-${isReady ? '0' : '1'}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeD0iMyIgeT0iMyIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOSIgY3k9IjkiIHI9IjIiPjwvY2lyY2xlPjxwYXRoIGQ9Im0yMSAxNS0zLjA4Ni0zLjA4NmEyIDIgMCAwIDAtMi44MjggMEw2IDIxIj48L3BhdGg+PC9zdmc+';">
+                        <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-inner relative bg-white">
+                            <img src="${item.img || ''}" class="w-full h-full object-cover ${isReady ? '' : 'grayscale opacity-50'}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeD0iMyIgeT0iMyIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOSIgY3k9IjkiIHI9IjIiPjwvY2lyY2xlPjxwYXRoIGQ9Im0yMSAxNS0zLjA4Ni0zLjA4NmEyIDIgMCAwIDAtMi44MjggMEw2IDIxIj48L3BhdGg+PC9zdmc+';">
+                        </div>
                         <div>
                             <p class="text-[11px] font-black text-slate-800 uppercase tracking-tight">${item.nama || item.name}</p>
-                            <p class="text-[9px] font-bold ${isReady ? 'text-emerald-500' : 'text-rose-500'} uppercase mt-0.5">${isReady ? 'Ready' : 'Sold Out'}</p>
+                            <p id="label-status-${item.id}" class="text-[9px] font-bold ${isReady ? 'text-emerald-500' : 'text-rose-500'} uppercase mt-0.5">${isReady ? 'Tersedia' : 'Habis'}</p>
                         </div>
                     </div>
-                    <button onclick="toggleStok(${item.id}, ${!isReady})" class="w-12 h-6 rounded-full relative transition-all ${isReady ? 'bg-emerald-400' : 'bg-slate-200'}">
-                        <div class="absolute top-1 ${isReady ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all"></div>
+                    
+                    <button id="toggle-btn-${item.id}" onclick="toggleStok(${item.id}, ${!isReady})" 
+                            class="w-12 h-6 rounded-full relative transition-all duration-300 ${isReady ? 'bg-emerald-400 shadow-lg shadow-emerald-100' : 'bg-slate-200'}">
+                        <div id="dot-${item.id}" class="absolute top-1 ${isReady ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all shadow-sm"></div>
                     </button>
                 </div>
             `;
@@ -74,8 +82,59 @@
     }
 
     async function toggleStok(id, newStatus) {
-        // Logika update status stok ke Google Sheets bisa ditambahkan di code.gs
-        alert("Fitur Update Stok Real-time sedang menghubungkan ke Database...");
+        const btn = document.getElementById(`toggle-btn-${id}`);
+        const dot = document.getElementById(`dot-${id}`);
+        const label = document.getElementById(`label-status-${id}`);
+        
+        // Simpan status lama untuk rollback jika gagal
+        const oldBg = btn.className;
+        
+        // Optimistic UI Update (Ubah dulu baru kirim)
+        btn.classList.add('opacity-50', 'pointer-events-none');
+        dot.innerHTML = `<i class="fas fa-circle-notch animate-spin text-[8px] text-slate-300 flex items-center justify-center h-full"></i>`;
+
+        const payload = {
+            action: 'updateStock',
+            data: { id: id, stock: newStatus ? "TRUE" : "FALSE" }
+        };
+
+        try {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify(payload) 
+            });
+            const result = await res.json();
+            
+            if(result.status === 'success') {
+                // Update tampilan sukses
+                btn.classList.remove('opacity-50', 'pointer-events-none');
+                dot.innerHTML = '';
+                
+                if(newStatus) {
+                    btn.className = "w-12 h-6 rounded-full relative transition-all bg-emerald-400 shadow-lg shadow-emerald-100";
+                    dot.style.left = 'auto';
+                    dot.style.right = '4px';
+                    label.className = "text-[9px] font-bold text-emerald-500 uppercase mt-0.5";
+                    label.innerText = "Tersedia";
+                } else {
+                    btn.className = "w-12 h-6 rounded-full relative transition-all bg-slate-200";
+                    dot.style.right = 'auto';
+                    dot.style.left = '4px';
+                    label.className = "text-[9px] font-bold text-rose-500 uppercase mt-0.5";
+                    label.innerText = "Habis";
+                }
+                
+                // Pemicu panggil ulang data untuk memastikan sinkronisasi total
+                loadStokData();
+            } else {
+                throw new Error("Server Error");
+            }
+        } catch (e) {
+            alert("Gagal memperbarui stok. Periksa koneksi internet Anda.");
+            btn.className = oldBg;
+            btn.classList.remove('opacity-50', 'pointer-events-none');
+            dot.innerHTML = '';
+        }
     }
 
     function checkStokAlert(data) {
@@ -83,11 +142,12 @@
         const container = document.getElementById('stok-alert-container');
         if(habis > 0) {
             container.classList.remove('hidden');
-            document.getElementById('stok-alert-msg').innerText = `${habis} Menu sedang habis. Segera perbarui ketersediaan.`;
+            document.getElementById('stok-alert-msg').innerText = `${habis} Menu sedang habis. Segera perbarui ketersediaan bahan baku.`;
         } else {
             container.classList.add('hidden');
         }
     }
 
+    // Inisialisasi awal
     loadStokData();
 </script>
