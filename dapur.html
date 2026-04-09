@@ -1,0 +1,112 @@
+<div class="space-y-8 animate-fadeIn">
+    <!-- Header Page -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Kitchen Display System</h3>
+            <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Kelola urutan masakan & monitor pesanan masuk</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="kitchen-status" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Monitoring Aktif
+            </span>
+            <button onclick="refreshOrders()" class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all">
+                <i class="fas fa-rotate"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Active Orders Grid -->
+    <div id="kitchen-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Loading State -->
+        <div class="animate-pulse bg-white h-64 rounded-[40px] border border-slate-100"></div>
+        <div class="animate-pulse bg-white h-64 rounded-[40px] border border-slate-100"></div>
+        <div class="animate-pulse bg-white h-64 rounded-[40px] border border-slate-100"></div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+    let activeOrders = [];
+
+    async function refreshOrders() {
+        try {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'getOrders' }) 
+            });
+            const result = await res.json();
+            
+            if(result.status === 'success') {
+                // Hanya tampilkan yang "Menunggu" atau "Dimasak"
+                activeOrders = result.data.filter(ord => ord.status === 'Menunggu' || ord.status === 'Dimasak');
+                renderKitchenGrid();
+            }
+        } catch (e) {
+            console.error("Gagal sinkronisasi dapur");
+        }
+    }
+
+    function renderKitchenGrid() {
+        const grid = document.getElementById('kitchen-grid');
+        if (activeOrders.length === 0) {
+            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-300"><i class="fas fa-utensils text-5xl mb-4"></i><p class="text-[11px] font-black uppercase tracking-[0.2em]">Semua pesanan sudah selesai disajikan.</p></div>`;
+            return;
+        }
+
+        grid.innerHTML = activeOrders.map(ord => {
+            const items = JSON.parse(ord.items);
+            const time = new Date(ord.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            return `
+                <div class="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1">
+                    <div class="p-6 ${ord.status === 'Dimasak' ? 'bg-orange-50 border-orange-100' : 'bg-slate-50 border-slate-100'} border-b flex justify-between items-start">
+                        <div>
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Meja ${ord.meja} &bull; ${ord.tipe || 'Dine In'}</span>
+                            <h4 class="text-lg font-black text-slate-800 uppercase mt-1">#${ord.id}</h4>
+                        </div>
+                        <span class="text-[10px] font-black text-slate-400 tabular-nums">${time}</span>
+                    </div>
+                    
+                    <div class="p-6 flex-1 space-y-4">
+                        ${items.map(i => `
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs shrink-0">${i.qty}</div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-black text-slate-800 uppercase tracking-tight leading-tight">${i.nama || i.name}</p>
+                                    ${i.note ? `<p class="text-[9px] font-bold text-orange-500 uppercase mt-1 italic"><i class="fas fa-comment-dots mr-1"></i> ${i.note}</p>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="p-6 pt-0 mt-auto">
+                        <button onclick="updateKitchenStatus('${ord.id}', '${ord.status === 'Menunggu' ? 'Dimasak' : 'Selesai'}')" 
+                                class="w-full py-4 rounded-3xl ${ord.status === 'Menunggu' ? 'bg-orange-500 text-white shadow-orange-200' : 'bg-emerald-500 text-white shadow-emerald-200'} shadow-lg font-black text-[11px] uppercase tracking-widest active:scale-95 transition-all">
+                            ${ord.status === 'Menunggu' ? 'MULAI MASAK' : 'MASAKAN SELESAI'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function updateKitchenStatus(id, newStatus) {
+        try {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'updateStatus', data: { id: id, status: newStatus } }) 
+            });
+            const result = await res.json();
+            if(result.status === 'success') {
+                refreshOrders();
+            }
+        } catch (e) {
+            alert("Koneksi bermasalah!");
+        }
+    }
+
+    // Auto Refresh setiap 30 detik
+    setInterval(refreshOrders, 30000);
+    refreshOrders();
+</script>
