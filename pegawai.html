@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <!-- Stats Cards (Matching image_8167bb.png) -->
+    <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-5">
             <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 text-xl">
@@ -62,12 +62,11 @@
                     </tr>
                 </thead>
                 <tbody id="pegawai-table-body" class="divide-y divide-slate-50">
-                    <!-- Loading State -->
                     <tr>
                         <td colspan="5" class="px-8 py-32 text-center">
                             <div class="flex flex-col items-center gap-4">
                                 <div class="w-10 h-10 border-4 border-slate-100 border-t-amber-400 rounded-full animate-spin"></div>
-                                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Menghubungkan Otoritas...</p>
+                                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Sinkronisasi Otoritas...</p>
                             </div>
                         </td>
                     </tr>
@@ -89,12 +88,12 @@
             <input type="hidden" id="pegawai-id-hidden">
             <div class="space-y-1">
                 <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Nama Lengkap</label>
-                <input type="text" id="pegawai-nama" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold text-slate-700">
+                <input type="text" id="pegawai-nama" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold text-slate-700 outline-none">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Jabatan / Posisi</label>
-                    <select id="pegawai-posisi" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold text-slate-700">
+                    <select id="pegawai-posisi" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold text-slate-700 outline-none cursor-pointer">
                         <option value="Owner">Owner</option>
                         <option value="Kasir">Kasir</option>
                         <option value="Koki">Koki</option>
@@ -103,19 +102,19 @@
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1">PIN (6 Digit)</label>
-                    <input type="password" id="pegawai-pin" maxlength="6" pattern="[0-9]{6}" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold tracking-widest text-slate-700">
+                    <input type="password" id="pegawai-pin" maxlength="6" pattern="[0-9]{6}" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold tracking-widest text-slate-700 outline-none">
                 </div>
             </div>
             <div class="space-y-1">
                 <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Status Kepegawaian</label>
-                <select id="pegawai-status" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold text-slate-700">
+                <select id="pegawai-status" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold text-slate-700 outline-none cursor-pointer">
                     <option value="Aktif">Aktif</option>
                     <option value="Izin">Izin</option>
                     <option value="Off">Off</option>
                 </select>
             </div>
             <div class="flex items-center gap-3 pt-6">
-                <button type="button" onclick="closePegawaiModal()" class="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] tracking-widest uppercase">Batal</button>
+                <button type="button" onclick="closePegawaiModal()" class="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] tracking-widest uppercase active:scale-95 transition-all">Batal</button>
                 <button type="submit" id="pegawai-btn-save" class="flex-[2] py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] tracking-widest uppercase shadow-xl active:scale-95 transition-all">Simpan Data</button>
             </div>
         </form>
@@ -123,14 +122,18 @@
 </div>
 
 <script id="pegawai-script">
+    // PENTING: Gunakan URL Web App terbaru Anda
     var API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
     var pegawaiList = [];
 
+    /**
+     * Memuat data pegawai dengan sistem Turbo Sync (Cache + Refresh)
+     */
     async function loadPegawaiData(force = false) {
         const body = document.getElementById('pegawai-table-body');
         const icon = document.getElementById('pegawai-refresh-icon');
         
-        // Turbo Sync: Cek cache lokal
+        // 1. Ambil dari Cache Lokal (Agar Instan)
         const cached = localStorage.getItem('master_pegawai');
         if(cached && !force) {
             pegawaiList = JSON.parse(cached);
@@ -141,6 +144,7 @@
         if(icon) icon.classList.add('fa-spin');
 
         try {
+            // 2. Tarik data terbaru dari Cloud
             const res = await fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'getPegawai' }) 
@@ -149,12 +153,14 @@
             
             if(result.status === 'success') {
                 pegawaiList = result.data;
+                // Simpan ke Cache untuk navigasi berikutnya
                 localStorage.setItem('master_pegawai', JSON.stringify(pegawaiList));
                 renderPegawaiTable(pegawaiList);
                 updatePegawaiStats(pegawaiList);
             }
         } catch (e) {
             if(!cached) body.innerHTML = `<tr><td colspan="5" class="py-20 text-center text-rose-500 font-black uppercase text-[10px]">Cloud Database Offline</td></tr>`;
+            console.error("Sync Error:", e);
         } finally {
             if(icon) icon.classList.remove('fa-spin');
         }
@@ -173,10 +179,12 @@
             <tr class="hover:bg-slate-50/50 transition-colors group">
                 <td class="px-8 py-5">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs">${p.id.toString().substring(0,2)}</div>
+                        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs">
+                            ${p.id.toString().substring(0,2)}
+                        </div>
                         <div>
-                            <p class="text-sm font-black text-slate-800 uppercase tracking-tight">${p.nama}</p>
-                            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">ID Staf: ${p.id}</p>
+                            <p class="text-sm font-black text-slate-800 uppercase tracking-tight">${p.nama || 'Tanpa Nama'}</p>
+                            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">ID: ${p.id}</p>
                         </div>
                     </div>
                 </td>
@@ -207,7 +215,7 @@
         document.getElementById('stat-off-count').innerText = `${data.filter(p => p.status !== 'Aktif').length} Orang`;
     }
 
-    // Modal & Form Logic
+    // Modal & CRUD Handlers
     function openAddPegawaiModal() {
         document.getElementById('pegawai-modal-title').innerText = "Tambah Pegawai Baru";
         document.getElementById('pegawai-form').reset();
@@ -233,13 +241,12 @@
         e.preventDefault();
         const btn = document.getElementById('pegawai-btn-save');
         const id = document.getElementById('pegawai-id-hidden').value;
-        const action = id ? 'submitPegawai' : 'submitPegawai'; // Sesuai ketersediaan di code.gs
         
         btn.disabled = true;
         btn.innerHTML = `<i class="fas fa-circle-notch animate-spin mr-2"></i> Memproses...`;
 
         const payload = {
-            action: action,
+            action: 'submitPegawai',
             data: {
                 id: id,
                 nama: document.getElementById('pegawai-nama').value,
@@ -257,7 +264,7 @@
                 loadPegawaiData(true);
             }
         } catch (err) {
-            alert("Sinkronisasi gagal. Pastikan API URL benar.");
+            alert("Sinkronisasi gagal. Pastikan Deployment Apps Script sudah 'Anyone'.");
         } finally {
             btn.disabled = false;
             btn.innerHTML = "Simpan Data";
@@ -273,9 +280,11 @@
             });
             const result = await res.json();
             if(result.status === 'success') loadPegawaiData(true);
-        } catch (e) { alert("Gagal menghapus data."); }
+        } catch (e) { alert("Penghapusan gagal."); }
     }
 
-    // Inisialisasi awal modul
-    setTimeout(loadPegawaiData, 100);
+    // Trik Manual untuk memicu load data karena dimuat lewat innerHTML
+    setTimeout(() => {
+        if(typeof loadPegawaiData === 'function') loadPegawaiData();
+    }, 100);
 </script>
