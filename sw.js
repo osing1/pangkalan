@@ -1,25 +1,26 @@
-const CACHE_NAME = 'rm-pangkalan-v4'; // Update versi karena ada aset baru
+const CACHE_NAME = 'rm-pangkalan-v5'; // Update versi
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './admin.html',
   './pos.html',
   './dashboard.html',
-  './pelanggan.html', // Halaman pelanggan baru
+  './admin_menu.html',
+  './laporan.html',
   './manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-// Install Service Worker dengan pengecekan satu per satu
+// Install Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Membuka cache...');
-      // Menggunakan allSettled agar tidak gagal total jika salah satu file belum dibuat
+      console.log('Membuka cache sistem...');
       return Promise.allSettled(
         ASSETS_TO_CACHE.map(url => {
-          return cache.add(url).catch(err => console.warn(`Gagal memuat aset ke cache: ${url}`, err));
+          return cache.add(url).catch(err => console.warn(`Gagal memuat aset: ${url}`, err));
         })
       );
     })
