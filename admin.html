@@ -142,7 +142,7 @@
 
     <script>
         async function navigate(pageUrl, element) {
-            if (!pageUrl || pageUrl === 'admin.html') return;
+            if (!pageUrl || pageUrl === 'admin.html' || pageUrl === '') return;
             const contentArea = document.getElementById('content-area');
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
@@ -215,21 +215,34 @@
 
         function logout() {
             localStorage.removeItem('user_session');
-            window.location.href = "login.html";
+            window.location.replace("login.html");
         }
 
         function checkRoleAccess() {
-            const session = JSON.parse(localStorage.getItem('user_session'));
-            if (!session) { window.location.href = "login.html"; return; }
+            try {
+                const sessionStr = localStorage.getItem('user_session');
+                const session = sessionStr ? JSON.parse(sessionStr) : null;
+                
+                if (!session) { 
+                    window.location.replace("login.html"); 
+                    return false; 
+                }
 
-            const role = session.role;
-            document.getElementById('user-name').innerText = session.nama;
-            document.getElementById('user-role-label').innerText = role + " Access";
-            document.getElementById('user-initial').innerText = (session.nama || "AD").substring(0,2).toUpperCase();
+                const role = session.role;
+                document.getElementById('user-name').innerText = session.nama || "User";
+                document.getElementById('user-role-label').innerText = (role || "Staff") + " Access";
+                document.getElementById('user-initial').innerText = (session.nama || "AD").substring(0,2).toUpperCase();
 
-            if (role === 'Koki') hideNav(['nav-pos', 'nav-pegawai', 'nav-laporan']);
-            else if (role === 'Kasir') hideNav(['nav-menu', 'nav-pegawai', 'nav-stok']);
-            else if (role === 'Waiter') hideNav(['nav-dashboard', 'nav-menu', 'nav-pegawai', 'nav-stok', 'nav-laporan']);
+                if (role === 'Koki') hideNav(['nav-pos', 'nav-pegawai', 'nav-laporan']);
+                else if (role === 'Kasir') hideNav(['nav-menu', 'nav-pegawai', 'nav-stok']);
+                else if (role === 'Waiter') hideNav(['nav-dashboard', 'nav-menu', 'nav-pegawai', 'nav-stok', 'nav-laporan']);
+                
+                return true;
+            } catch (e) {
+                console.error("Auth check failed:", e);
+                window.location.replace("login.html");
+                return false;
+            }
         }
 
         function hideNav(ids) {
@@ -240,14 +253,23 @@
         }
 
         window.onload = () => {
-            checkRoleAccess();
+            if (!checkRoleAccess()) return;
+            
             startClock();
             const last = localStorage.getItem('admin_last_page') || 'dashboard.html';
             const btns = Array.from(document.querySelectorAll('.nav-btn'));
-            const defBtn = btns.find(b => b.getAttribute('onclick').includes(last) && b.style.display !== 'none') || btns.find(b => b.style.display !== 'none');
+            
+            // Mencari button navigasi yang sesuai dengan halaman terakhir, dipastikan path tidak kosong
+            const defBtn = btns.find(b => {
+                const attr = b.getAttribute('onclick');
+                return attr && attr.includes(last) && b.style.display !== 'none';
+            }) || btns.find(b => b.style.display !== 'none');
+
             if (defBtn) {
-                const path = defBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
-                navigate(path, defBtn);
+                const match = defBtn.getAttribute('onclick').match(/'([^']+)'/);
+                if (match && match[1]) {
+                    navigate(match[1], defBtn);
+                }
             }
         };
     </script>
