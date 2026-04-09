@@ -2,8 +2,8 @@
     <!-- Header Page -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Manajemen Pegawai</h3>
-            <p class="text-xs font-bold text-slate-400 mt-1">Kelola data staf dan status kehadiran</p>
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Otoritas & Data Pegawai</h3>
+            <p class="text-xs font-bold text-slate-400 mt-1">Kelola hak akses sistem dan status kehadiran</p>
         </div>
         <button onclick="openAddPegawaiModal()" class="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] tracking-widest shadow-xl active:scale-95 transition-all uppercase">
             <i class="fas fa-user-plus"></i> Tambah Pegawai
@@ -23,11 +23,11 @@
         </div>
         <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-5">
             <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
-                <i class="fas fa-user-check text-2xl"></i>
+                <i class="fas fa-shield-halved text-2xl"></i>
             </div>
             <div>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sedang Bertugas</p>
-                <h4 id="stat-pegawai-aktif" class="text-xl font-black text-slate-800 mt-0.5">0 Orang</h4>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Admin/Owner</p>
+                <h4 id="stat-pegawai-admin" class="text-xl font-black text-slate-800 mt-0.5">0 Orang</h4>
             </div>
         </div>
         <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-5">
@@ -44,9 +44,9 @@
     <!-- Pegawai Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="pegawai-grid">
         <!-- Loading State -->
-        <div class="animate-pulse bg-white h-40 rounded-[32px] border border-slate-100"></div>
-        <div class="animate-pulse bg-white h-40 rounded-[32px] border border-slate-100"></div>
-        <div class="animate-pulse bg-white h-40 rounded-[32px] border border-slate-100"></div>
+        <div class="animate-pulse bg-white h-48 rounded-[32px] border border-slate-100"></div>
+        <div class="animate-pulse bg-white h-48 rounded-[32px] border border-slate-100"></div>
+        <div class="animate-pulse bg-white h-48 rounded-[32px] border border-slate-100"></div>
     </div>
 </div>
 
@@ -54,39 +54,49 @@
 <div id="pegawai-modal" class="fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closePegawaiModal()"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-[40px] shadow-2xl p-8">
-        <h3 id="pegawai-modal-title" class="text-xl font-black text-slate-800 uppercase mb-6">Data Pegawai</h3>
+        <h3 id="pegawai-modal-title" class="text-xl font-black text-slate-800 uppercase mb-6">Pengaturan Akses</h3>
         <form id="pegawai-form" class="space-y-4">
             <input type="hidden" id="p-id">
             <div class="space-y-1">
                 <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Nama Lengkap</label>
                 <input type="text" id="p-nama" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
             </div>
-            <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Posisi / Jabatan</label>
-                <select id="p-posisi" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
-                    <option value="Kasir">Kasir</option>
-                    <option value="Pelayan">Pelayan</option>
-                    <option value="Koki">Koki</option>
-                    <option value="Admin">Admin</option>
-                </select>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Role / Jabatan</label>
+                    <select id="p-posisi" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                        <option value="Owner">Owner/Admin</option>
+                        <option value="Kasir">Kasir</option>
+                        <option value="Koki">Koki (Dapur)</option>
+                        <option value="Waiter">Waiter</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">PIN Akses (6 Digit)</label>
+                    <input type="password" id="p-pin" maxlength="6" placeholder="******" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                </div>
+            </div>
+            <div class="p-4 bg-amber-50 rounded-2xl">
+                <p class="text-[9px] font-bold text-amber-700 leading-relaxed uppercase">
+                    <i class="fas fa-info-circle mr-1"></i> 
+                    Hak akses akan disesuaikan secara otomatis berdasarkan Role yang dipilih.
+                </p>
             </div>
             <div class="flex items-center gap-3 pt-4">
                 <button type="button" onclick="closePegawaiModal()" class="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] tracking-widest uppercase">Batal</button>
-                <button type="submit" id="p-btn-save" class="flex-[2] py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] tracking-widest uppercase shadow-xl active:scale-95 transition-all">Simpan Data</button>
+                <button type="submit" id="p-btn-save" class="flex-[2] py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] tracking-widest uppercase shadow-xl active:scale-95 transition-all">Simpan Otoritas</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // URL Backend Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
     let allPegawai = [];
 
     async function loadPegawaiData() {
         const grid = document.getElementById('pegawai-grid');
         try {
-            // Simulasi fetch data pegawai (Anda perlu menambahkan tab 'Pegawai' di Google Sheets)
             const res = await fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'getPegawai' }) 
@@ -99,11 +109,12 @@
                 updatePegawaiStats(allPegawai);
             }
         } catch (e) {
-            // Data dummy jika tab belum ada
+            // Data dummy untuk ilustrasi
             allPegawai = [
-                { id: 1, nama: "Budi Santoso", posisi: "Kasir", status: "Aktif" },
-                { id: 2, nama: "Siti Aminah", posisi: "Koki", status: "Aktif" },
-                { id: 3, nama: "Andi Wijaya", posisi: "Pelayan", status: "Off" }
+                { id: 1, nama: "Budi Santoso", posisi: "Owner", status: "Aktif", pin: "123456" },
+                { id: 2, nama: "Siti Aminah", posisi: "Kasir", status: "Aktif", pin: "112233" },
+                { id: 3, nama: "Andi Wijaya", posisi: "Koki", status: "Off", pin: "445566" },
+                { id: 4, nama: "Rizky Pratama", posisi: "Waiter", status: "Aktif", pin: "778899" }
             ];
             renderPegawaiGrid(allPegawai);
             updatePegawaiStats(allPegawai);
@@ -112,36 +123,53 @@
 
     function renderPegawaiGrid(data) {
         const grid = document.getElementById('pegawai-grid');
-        grid.innerHTML = data.map(p => `
-            <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
-                        <i class="fas fa-user text-xl"></i>
+        grid.innerHTML = data.map(p => {
+            let roleIcon = "fa-user";
+            let roleColor = "text-slate-400";
+            
+            if(p.posisi === 'Owner') { roleIcon = "fa-shield-check"; roleColor = "text-amber-500"; }
+            else if(p.posisi === 'Kasir') { roleIcon = "fa-cash-register"; roleColor = "text-blue-500"; }
+            else if(p.posisi === 'Koki') { roleIcon = "fa-fire-burner"; roleColor = "text-orange-500"; }
+            else if(p.posisi === 'Waiter') { roleIcon = "fa-bell-concierge"; roleColor = "text-indigo-500"; }
+
+            return `
+            <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                <div class="flex items-start justify-between mb-4 relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center ${roleColor} group-hover:scale-110 transition-transform">
+                        <i class="fas ${roleIcon} text-xl"></i>
                     </div>
-                    <span class="px-2 py-1 rounded-lg ${p.status === 'Aktif' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'} text-[8px] font-black uppercase tracking-widest">
-                        ${p.status}
-                    </span>
+                    <div class="flex flex-col items-end">
+                        <span class="px-2 py-1 rounded-lg ${p.status === 'Aktif' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'} text-[8px] font-black uppercase tracking-widest">
+                            ${p.status}
+                        </span>
+                        <p class="text-[8px] font-black text-slate-300 uppercase mt-2">PIN: ***${p.pin ? p.pin.slice(-3) : '---'}</p>
+                    </div>
                 </div>
-                <div>
+                <div class="relative z-10">
                     <h5 class="font-black text-slate-800 uppercase tracking-tight text-sm">${p.nama}</h5>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">${p.posisi}</p>
-                </div>
-                <div class="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
-                    <div class="flex gap-2">
-                        <button onclick="editPegawai(${p.id})" class="text-[9px] font-black text-amber-500 uppercase hover:underline">Edit</button>
-                        <button onclick="deletePegawai(${p.id})" class="text-[9px] font-black text-rose-400 uppercase hover:underline">Hapus</button>
+                    <div class="flex items-center gap-2 mt-1">
+                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${p.posisi}</p>
                     </div>
-                    <button onclick="toggleAbsensi(${p.id})" class="text-[9px] font-black text-indigo-500 uppercase bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors">
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between relative z-10">
+                    <div class="flex gap-3">
+                        <button onclick="editPegawai(${p.id})" class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all"><i class="fas fa-edit text-[10px]"></i></button>
+                        <button onclick="deletePegawai(${p.id})" class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"><i class="fas fa-trash text-[10px]"></i></button>
+                    </div>
+                    <button onclick="toggleAbsensi(${p.id})" class="text-[9px] font-black text-slate-500 uppercase bg-slate-100 px-4 py-2 rounded-xl hover:bg-slate-900 hover:text-white transition-all">
                         Tukar Status
                     </button>
                 </div>
+                <!-- Role Background Decorative Icon -->
+                <i class="fas ${roleIcon} absolute -right-4 -bottom-4 text-7xl opacity-[0.03] group-hover:scale-110 transition-transform"></i>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     function updatePegawaiStats(data) {
         document.getElementById('stat-pegawai-total').innerText = `${data.length} Orang`;
-        document.getElementById('stat-pegawai-aktif').innerText = `${data.filter(p => p.status === 'Aktif').length} Orang`;
+        document.getElementById('stat-pegawai-admin').innerText = `${data.filter(p => p.posisi === 'Owner').length} Orang`;
         document.getElementById('stat-pegawai-off').innerText = `${data.filter(p => p.status !== 'Aktif').length} Orang`;
     }
 
@@ -154,6 +182,11 @@
 
     function closePegawaiModal() { document.getElementById('pegawai-modal').classList.add('hidden'); }
 
-    // Jalankan saat load
+    // Logic untuk integrasi hak akses di admin.html nantinya:
+    // 1. Buat halaman login.html
+    // 2. Cek PIN dan dapatkan Role
+    // 3. Simpan localStorage.setItem('userRole', role)
+    // 4. Di admin.html, tambahkan fungsi untuk sembunyikan menu jika Role != 'Owner'
+
     loadPegawaiData();
 </script>
