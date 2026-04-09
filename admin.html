@@ -61,7 +61,8 @@
                                 <i class="fas fa-list-ul w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Kelola Menu</span>
                             </button>
-                            <button id="nav-stok" onclick="navigate('stok.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                            <!-- PERBAIKAN LINK: stok.html diganti ke inventori.html -->
+                            <button id="nav-stok" onclick="navigate('inventori.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
                                 <i class="fas fa-boxes-stacked w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Inventori Stok</span>
                             </button>
@@ -146,14 +147,28 @@
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
             if (!contentArea) return;
+            
             if (window.innerWidth < 1024) toggleSidebar();
             contentArea.classList.add('fade-out');
+
             try {
                 const response = await fetch(pageUrl);
                 if (!response.ok) throw new Error(`NOT_FOUND`);
                 const html = await response.text();
+                
                 setTimeout(() => {
                     contentArea.innerHTML = html;
+                    
+                    // --- PERBAIKAN KRUSIAL: Eksekusi Script Manual ---
+                    const scripts = contentArea.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                    // ------------------------------------------------
+
                     updateHeader(element, pageTitle, pageSubtitle);
                     finishNav(element, pageUrl);
                 }, 300);
@@ -161,6 +176,7 @@
                 contentArea.innerHTML = `<div class="flex flex-col items-center justify-center h-[50vh] text-center px-4"><div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-6 shadow-inner"><i class="fas fa-cloud-arrow-up text-2xl"></i></div><h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Siap Untuk GitHub Pages</h2><div class="text-slate-400 max-w-sm mt-2 text-[11px] font-semibold uppercase tracking-wider">Unggah <b>"${pageUrl}"</b> untuk mengaktifkan modul ini.</div></div>`;
                 updateHeader(element, pageTitle, pageSubtitle);
                 finishNav(element, pageUrl);
+                contentArea.classList.remove('fade-out');
             }
         }
 
@@ -202,7 +218,6 @@
             window.location.href = "login.html";
         }
 
-        // --- SISTEM OTORITAS ROLE ---
         function checkRoleAccess() {
             const session = JSON.parse(localStorage.getItem('user_session'));
             if (!session) { window.location.href = "login.html"; return; }
@@ -210,17 +225,11 @@
             const role = session.role;
             document.getElementById('user-name').innerText = session.nama;
             document.getElementById('user-role-label').innerText = role + " Access";
-            document.getElementById('user-initial').innerText = session.nama.substring(0,2).toUpperCase();
+            document.getElementById('user-initial').innerText = (session.nama || "AD").substring(0,2).toUpperCase();
 
-            // Saring tombol navigasi berdasarkan role
-            if (role === 'Koki') {
-                hideNav(['nav-pos', 'nav-pegawai', 'nav-laporan']);
-            } else if (role === 'Kasir') {
-                hideNav(['nav-menu', 'nav-pegawai', 'nav-stok']);
-            } else if (role === 'Waiter') {
-                hideNav(['nav-dashboard', 'nav-menu', 'nav-pegawai', 'nav-stok', 'nav-laporan']);
-            }
-            // Owner/Admin melihat semuanya
+            if (role === 'Koki') hideNav(['nav-pos', 'nav-pegawai', 'nav-laporan']);
+            else if (role === 'Kasir') hideNav(['nav-menu', 'nav-pegawai', 'nav-stok']);
+            else if (role === 'Waiter') hideNav(['nav-dashboard', 'nav-menu', 'nav-pegawai', 'nav-stok', 'nav-laporan']);
         }
 
         function hideNav(ids) {
