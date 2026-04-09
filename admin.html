@@ -40,30 +40,43 @@
                     <div>
                         <p class="px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Ringkasan</p>
                         <div class="space-y-1">
-                            <button onclick="navigate('dashboard.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                            <button id="nav-dashboard" onclick="navigate('dashboard.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
                                 <i class="fas fa-chart-pie w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Dashboard</span>
                             </button>
-                            <button onclick="navigate('pos.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                            <button id="nav-pos" onclick="navigate('pos.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
                                 <i class="fas fa-cash-register w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Kasir (POS)</span>
+                            </button>
+                            <button id="nav-dapur" onclick="navigate('dapur.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-fire-burner w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Dapur</span>
                             </button>
                         </div>
                     </div>
                     <div>
                         <p class="px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Manajemen</p>
                         <div class="space-y-1">
-                            <button onclick="navigate('admin_menu.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                            <button id="nav-menu" onclick="navigate('admin_menu.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
                                 <i class="fas fa-list-ul w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Kelola Menu</span>
                             </button>
-                            <button onclick="navigate('stok.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                            <button id="nav-stok" onclick="navigate('stok.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
                                 <i class="fas fa-boxes-stacked w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Inventori Stok</span>
                             </button>
-                            <button onclick="navigate('pegawai.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                            <button id="nav-pegawai" onclick="navigate('pegawai.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
                                 <i class="fas fa-user-tie w-6 text-lg group-hover:text-amber-400"></i>
                                 <span>Pegawai</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Laporan</p>
+                        <div class="space-y-1">
+                            <button id="nav-laporan" onclick="navigate('laporan.html', this)" class="nav-btn w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all hover:bg-slate-800 hover:text-white group">
+                                <i class="fas fa-file-invoice-dollar w-6 text-lg group-hover:text-amber-400"></i>
+                                <span>Rekap Penjualan</span>
                             </button>
                         </div>
                     </div>
@@ -71,14 +84,14 @@
 
                 <div class="p-4 bg-slate-950/50">
                     <div class="flex items-center p-3 rounded-xl bg-slate-800/40 border border-slate-700/50">
-                        <div class="w-10 h-10 rounded-lg bg-amber-400 flex items-center justify-center text-slate-900 font-black">AD</div>
+                        <div id="user-initial" class="w-10 h-10 rounded-lg bg-amber-400 flex items-center justify-center text-slate-900 font-black">AD</div>
                         <div class="ml-3 overflow-hidden">
-                            <p class="text-xs font-bold text-white truncate">Administrator</p>
-                            <p class="text-[9px] text-slate-500 truncate uppercase font-bold">Owner Access</p>
+                            <p id="user-name" class="text-xs font-bold text-white truncate">Administrator</p>
+                            <p id="user-role-label" class="text-[9px] text-slate-500 truncate uppercase font-bold">Owner Access</p>
                         </div>
-                        <a href="index.html" class="ml-auto text-slate-500 hover:text-rose-400 transition-colors">
+                        <button onclick="logout()" class="ml-auto text-slate-500 hover:text-rose-400 transition-colors" title="Keluar">
                             <i class="fas fa-power-off"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -114,10 +127,9 @@
             <main class="flex-1 overflow-y-auto relative p-6 lg:p-10">
                 <div class="max-w-[1600px] mx-auto">
                     <div id="content-area">
-                        <!-- Animasi Loading saat awal -->
                         <div class="flex flex-col items-center justify-center h-[50vh] text-slate-300">
                             <div class="w-12 h-12 border-4 border-slate-100 border-t-amber-400 rounded-full animate-spin mb-4"></div>
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em]">Menghubungkan ke Database...</p>
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em]">Memuat Otoritas...</p>
                         </div>
                     </div>
                 </div>
@@ -129,46 +141,24 @@
 
     <script>
         async function navigate(pageUrl, element) {
-            // Cegah loading halaman shell itu sendiri ke dalam konten
             if (!pageUrl || pageUrl === 'admin.html') return;
-            
             const contentArea = document.getElementById('content-area');
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
-            
             if (!contentArea) return;
             if (window.innerWidth < 1024) toggleSidebar();
-
             contentArea.classList.add('fade-out');
-
             try {
                 const response = await fetch(pageUrl);
                 if (!response.ok) throw new Error(`NOT_FOUND`);
-                
                 const html = await response.text();
-                
                 setTimeout(() => {
                     contentArea.innerHTML = html;
                     updateHeader(element, pageTitle, pageSubtitle);
                     finishNav(element, pageUrl);
                 }, 300);
-
             } catch (error) {
-                // Tampilan instruksi yang lebih bersih jika file tidak ditemukan
-                contentArea.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-[50vh] text-center px-4">
-                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-6 shadow-inner">
-                            <i class="fas fa-cloud-arrow-up text-2xl"></i>
-                        </div>
-                        <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Siap Untuk GitHub Pages</h2>
-                        <div class="text-slate-400 max-w-sm mt-2 text-[11px] font-semibold uppercase tracking-wider leading-relaxed">
-                            Fitur navigasi ini memerlukan server aktif.<br>
-                            Silakan unggah file <b>"${pageUrl}"</b> ke GitHub Anda untuk mengaktifkan modul ini secara otomatis.
-                        </div>
-                        <div class="mt-8 flex gap-3">
-                            <button onclick="location.reload()" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Segarkan</button>
-                        </div>
-                    </div>`;
+                contentArea.innerHTML = `<div class="flex flex-col items-center justify-center h-[50vh] text-center px-4"><div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-6 shadow-inner"><i class="fas fa-cloud-arrow-up text-2xl"></i></div><h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Siap Untuk GitHub Pages</h2><div class="text-slate-400 max-w-sm mt-2 text-[11px] font-semibold uppercase tracking-wider">Unggah <b>"${pageUrl}"</b> untuk mengaktifkan modul ini.</div></div>`;
                 updateHeader(element, pageTitle, pageSubtitle);
                 finishNav(element, pageUrl);
             }
@@ -178,7 +168,7 @@
             if (el) {
                 const text = el.querySelector('span').innerText;
                 titleEl.innerText = text;
-                const subs = { 'Dashboard': 'Ringkasan Operasional Hari Ini', 'Kasir (POS)': 'Input Transaksi Penjualan', 'Kelola Menu': 'Pengaturan Katalog Menu', 'Inventori Stok': 'Manajemen Stok Bahan', 'Pegawai': 'Data Karyawan', 'Rekap Penjualan': 'Laporan Keuangan' };
+                const subs = { 'Dashboard': 'Ringkasan Operasional Hari Ini', 'Kasir (POS)': 'Input Transaksi Penjualan', 'Dapur': 'Monitor Pesanan Masuk', 'Kelola Menu': 'Pengaturan Katalog Menu', 'Inventori Stok': 'Manajemen Stok Bahan', 'Pegawai': 'Data Karyawan', 'Rekap Penjualan': 'Laporan Keuangan' };
                 subEl.innerText = subs[text] || 'Sistem Aktif';
             }
         }
@@ -207,11 +197,45 @@
             up(); setInterval(up, 1000);
         }
 
+        function logout() {
+            localStorage.removeItem('user_session');
+            window.location.href = "login.html";
+        }
+
+        // --- SISTEM OTORITAS ROLE ---
+        function checkRoleAccess() {
+            const session = JSON.parse(localStorage.getItem('user_session'));
+            if (!session) { window.location.href = "login.html"; return; }
+
+            const role = session.role;
+            document.getElementById('user-name').innerText = session.nama;
+            document.getElementById('user-role-label').innerText = role + " Access";
+            document.getElementById('user-initial').innerText = session.nama.substring(0,2).toUpperCase();
+
+            // Saring tombol navigasi berdasarkan role
+            if (role === 'Koki') {
+                hideNav(['nav-pos', 'nav-pegawai', 'nav-laporan']);
+            } else if (role === 'Kasir') {
+                hideNav(['nav-menu', 'nav-pegawai', 'nav-stok']);
+            } else if (role === 'Waiter') {
+                hideNav(['nav-dashboard', 'nav-menu', 'nav-pegawai', 'nav-stok', 'nav-laporan']);
+            }
+            // Owner/Admin melihat semuanya
+        }
+
+        function hideNav(ids) {
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+
         window.onload = () => {
+            checkRoleAccess();
             startClock();
             const last = localStorage.getItem('admin_last_page') || 'dashboard.html';
             const btns = Array.from(document.querySelectorAll('.nav-btn'));
-            const defBtn = btns.find(b => b.getAttribute('onclick').includes(last)) || btns[0];
+            const defBtn = btns.find(b => b.getAttribute('onclick').includes(last) && b.style.display !== 'none') || btns.find(b => b.style.display !== 'none');
             if (defBtn) {
                 const path = defBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
                 navigate(path, defBtn);
