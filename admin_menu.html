@@ -1,0 +1,211 @@
+<div class="space-y-8 animate-fadeIn">
+    <!-- Header Page -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Manajemen Katalog Menu</h3>
+            <p class="text-xs font-bold text-slate-400 mt-1">Sinkronisasi Real-time dengan Google Sheets</p>
+        </div>
+        <button onclick="openAddMenuModal()" class="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] tracking-widest shadow-xl active:scale-95 transition-all">
+            <i class="fas fa-plus"></i> TAMBAH MENU BARU
+        </button>
+    </div>
+
+    <!-- Stats Menu -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Item</p>
+            <h4 id="stat-total" class="text-xl font-black text-slate-800 mt-1">0</h4>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Makanan</p>
+            <h4 id="stat-makanan" class="text-xl font-black text-emerald-600 mt-1">0</h4>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Minuman</p>
+            <h4 id="stat-minuman" class="text-xl font-black text-indigo-600 mt-1">0</h4>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Stok Habis</p>
+            <h4 id="stat-habis" class="text-xl font-black text-rose-600 mt-1">0</h4>
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Produk</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategori</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Harga</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-table-body" class="divide-y divide-slate-50">
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="5" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <i class="fas fa-circle-notch animate-spin text-amber-400 text-2xl"></i>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Menarik data dari server...</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Form (Hidden) -->
+<div id="menu-modal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeMenuModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg bg-white rounded-[40px] shadow-2xl p-8">
+        <h3 id="modal-title" class="text-xl font-black text-slate-800 uppercase mb-6">Tambah Menu</h3>
+        <form id="menu-form" class="space-y-4">
+            <input type="hidden" id="form-id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Nama Menu</label>
+                    <input type="text" id="form-nama" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kategori</label>
+                    <select id="form-kategori" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                        <option value="Makanan">Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Camilan">Camilan</option>
+                        <option value="Paket">Paket</option>
+                    </select>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Harga (Rp)</label>
+                <input type="number" id="form-harga" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">URL Gambar</label>
+                <input type="text" id="form-img" placeholder="https://..." class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+            </div>
+            <div class="flex items-center gap-3 pt-4">
+                <button type="button" onclick="closeMenuModal()" class="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] tracking-widest uppercase">Batal</button>
+                <button type="submit" id="btn-save" class="flex-[2] py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] tracking-widest uppercase shadow-xl shadow-slate-200 active:scale-95 transition-all">Simpan Menu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Gunakan URL Web App Google Script Anda
+    const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+    let allMenus = [];
+
+    // Fungsi Utama: Ambil Data
+    async function refreshMenuTable() {
+        const body = document.getElementById('menu-table-body');
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getMenu' })
+            });
+            const result = await res.json();
+            
+            if(result.status === 'success') {
+                allMenus = result.data;
+                renderTable(allMenus);
+                updateStats(allMenus);
+            }
+        } catch (e) {
+            body.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-rose-500 font-bold">Gagal terhubung ke database</td></tr>`;
+        }
+    }
+
+    function renderTable(data) {
+        const body = document.getElementById('menu-table-body');
+        body.innerHTML = data.map(item => `
+            <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-4">
+                        <img src="${item.img || ''}" class="w-12 h-12 rounded-xl object-cover bg-slate-100" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeD0iMyIgeT0iMyIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOSIgY3k9IjkiIHI9IjIiPjwvY2lyY2xlPjxwYXRoIGQ9Im0yMSAxNS0zLjA4Ni0zLjA4NmEyIDIgMCAwIDAtMi44MjggMEw2IDIxIj48L3BhdGg+PC9zdmc+';">
+                        <div>
+                            <p class="text-sm font-black text-slate-800 uppercase tracking-tight">${item.nama || item.name}</p>
+                            <p class="text-[9px] font-bold text-slate-400 mt-0.5">ID: #${item.id}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-wider">${item.kategori}</span>
+                </td>
+                <td class="px-6 py-4">
+                    <p class="text-sm font-black text-slate-800">Rp ${parseInt(item.harga).toLocaleString()}</p>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <span class="px-2.5 py-1 rounded-full ${item.stock == 'TRUE' || item.stock === true ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} text-[8px] font-black uppercase tracking-widest">
+                        ${item.stock == 'TRUE' || item.stock === true ? 'Tersedia' : 'Habis'}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-center gap-2">
+                        <button onclick="editMenu(${item.id})" class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs transition-all active:scale-90 hover:bg-amber-100"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteMenu(${item.id})" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-400 flex items-center justify-center text-xs transition-all active:scale-90 hover:bg-rose-100"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function updateStats(data) {
+        document.getElementById('stat-total').innerText = data.length;
+        document.getElementById('stat-makanan').innerText = data.filter(i => i.kategori === 'Makanan').length;
+        document.getElementById('stat-minuman').innerText = data.filter(i => i.kategori === 'Minuman').length;
+        document.getElementById('stat-habis').innerText = data.filter(i => i.stock != 'TRUE' && i.stock !== true).length;
+    }
+
+    // Modal & Form Logic
+    function openAddMenuModal() {
+        document.getElementById('modal-title').innerText = "Tambah Menu Baru";
+        document.getElementById('menu-form').reset();
+        document.getElementById('form-id').value = "";
+        document.getElementById('menu-modal').classList.remove('hidden');
+    }
+
+    function closeMenuModal() { document.getElementById('menu-modal').classList.add('hidden'); }
+
+    document.getElementById('menu-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-save');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-circle-notch animate-spin mr-2"></i> Memproses...`;
+
+        const payload = {
+            action: 'submitMenu', // Anda perlu menambahkan aksi ini di code.gs
+            data: {
+                nama: document.getElementById('form-nama').value,
+                harga: document.getElementById('form-harga').value,
+                kategori: document.getElementById('form-kategori').value,
+                img: document.getElementById('form-img').value,
+                stock: "TRUE"
+            }
+        };
+
+        try {
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const result = await res.json();
+            if(result.status === 'success') {
+                alert("Menu Berhasil Disimpan!");
+                closeMenuModal();
+                refreshMenuTable();
+            }
+        } catch (err) {
+            alert("Terjadi kesalahan sistem.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = "Simpan Menu";
+        }
+    });
+
+    // Inisialisasi awal saat modul dimuat
+    refreshMenuTable();
+</script>
