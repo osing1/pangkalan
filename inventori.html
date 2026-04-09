@@ -3,11 +3,13 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Inventori Bahan Baku</h3>
-            <p class="text-xs font-bold text-slate-400 mt-1">Kelola stok komoditas dan bahan dapur secara real-time</p>
+            <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">
+                Manajemen komoditas & bahan dapur &bull; Sinkronisasi Cloud Aktif
+            </p>
         </div>
         <div class="flex gap-2">
-            <button onclick="loadInventoriData()" class="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:text-amber-500 transition-all shadow-sm">
-                <i class="fas fa-sync-alt"></i>
+            <button onclick="loadInventoriData()" class="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:text-amber-500 transition-all shadow-sm active:scale-95">
+                <i class="fas fa-sync-alt" id="refresh-icon"></i>
             </button>
             <button onclick="openAddInvModal()" class="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] tracking-widest shadow-xl active:scale-95 transition-all uppercase">
                 <i class="fas fa-plus"></i> Tambah Bahan
@@ -18,35 +20,38 @@
     <!-- Quick Search & Filter -->
     <div class="relative max-w-md">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
-        <input type="text" id="inv-search" oninput="filterInventori()" placeholder="Cari nama bahan (misal: Ayam, Beras...)" class="w-full pl-12 pr-4 py-3 rounded-2xl border border-slate-100 focus:ring-2 focus:ring-amber-400 outline-none text-sm font-medium transition-all shadow-sm">
+        <input type="text" id="inv-search" oninput="filterInventori()" placeholder="Cari nama bahan (Ayam, Beras, Minyak...)" class="w-full pl-12 pr-4 py-3 rounded-2xl border border-slate-100 focus:ring-2 focus:ring-amber-400 outline-none text-sm font-medium transition-all shadow-sm bg-white">
     </div>
 
     <!-- Inventory Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="inv-stats">
-        <div class="bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm">
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Komoditas</p>
-            <h4 id="stat-total-inv" class="text-xl font-black text-slate-800 mt-1">0</h4>
+        <div class="bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm overflow-hidden relative">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10">Total Komoditas</p>
+            <h4 id="stat-total-inv" class="text-2xl font-black text-slate-800 mt-1 relative z-10">0</h4>
+            <i class="fas fa-boxes-stacked absolute -right-2 -bottom-2 text-4xl text-slate-50"></i>
         </div>
         <div class="bg-white p-5 rounded-[32px] border border-rose-100 shadow-sm relative overflow-hidden group">
             <div class="relative z-10">
                 <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Stok Menipis</p>
-                <h4 id="stat-low-inv" class="text-xl font-black text-rose-600 mt-1">0</h4>
+                <h4 id="stat-low-inv" class="text-2xl font-black text-rose-600 mt-1">0</h4>
             </div>
             <i class="fas fa-exclamation-triangle absolute -right-2 -bottom-2 text-4xl text-rose-50 opacity-0 group-hover:opacity-100 transition-opacity"></i>
         </div>
-        <div class="bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm">
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Status Gudang</p>
-            <h4 class="text-[10px] font-black text-emerald-500 mt-2 uppercase tracking-tighter italic">Normal & Terkendali</h4>
+        <div class="bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-center">
+            <div class="text-center">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Gudang</p>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[8px] font-black uppercase">Stabil</span>
+            </div>
         </div>
     </div>
 
-    <!-- Inventory Grid/Table -->
-    <div class="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
+    <!-- Inventory Table -->
+    <div class="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/50 border-b border-slate-100">
-                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Bahan</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Bahan Baku</th>
                         <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Stok</th>
                         <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Satuan</th>
                         <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
@@ -54,12 +59,12 @@
                     </tr>
                 </thead>
                 <tbody id="inv-table-body" class="divide-y divide-slate-50">
-                    <!-- Loading Skeletons -->
+                    <!-- Loading State -->
                     <tr>
-                        <td colspan="5" class="px-8 py-20 text-center">
-                            <div class="flex flex-col items-center gap-3">
-                                <i class="fas fa-circle-notch animate-spin text-amber-400 text-2xl"></i>
-                                <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Menyelaraskan data...</p>
+                        <td colspan="5" class="px-8 py-32 text-center">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="w-10 h-10 border-4 border-slate-100 border-t-amber-400 rounded-full animate-spin"></div>
+                                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Sinkronisasi Turbo...</p>
                             </div>
                         </td>
                     </tr>
@@ -71,48 +76,56 @@
 
 <!-- Modal Form Inventori -->
 <div id="inv-modal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeInvModal()"></div>
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onclick="closeInvModal()"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-[40px] shadow-2xl p-8">
         <div class="flex justify-between items-center mb-6">
-            <h3 id="inv-modal-title" class="text-xl font-black text-slate-800 uppercase tracking-tight">Bahan Baku</h3>
-            <button onclick="closeInvModal()" class="text-slate-300 hover:text-slate-500"><i class="fas fa-times"></i></button>
+            <h3 id="inv-modal-title" class="text-xl font-black text-slate-800 uppercase tracking-tight">Data Inventori</h3>
+            <button onclick="closeInvModal()" class="text-slate-300 hover:text-slate-500 transition-colors"><i class="fas fa-times"></i></button>
         </div>
         <form id="inv-form" class="space-y-4">
             <input type="hidden" id="inv-id">
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Nama Bahan</label>
-                <input type="text" id="inv-nama" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Nama Komoditas</label>
+                <input type="text" id="inv-nama" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Stok Saat Ini</label>
-                    <input type="number" id="inv-stok" step="0.01" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                    <input type="number" id="inv-stok" step="0.01" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Satuan</label>
-                    <input type="text" id="inv-satuan" placeholder="kg, liter, ekor" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                    <input type="text" id="inv-satuan" placeholder="kg, ekor, liter" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
                 </div>
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Batas Minimum (Alert)</label>
-                <input type="number" id="inv-min" step="0.01" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Batas Minimum (Peringatan)</label>
+                <input type="number" id="inv-min" step="0.01" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-amber-400 text-sm font-semibold">
             </div>
-            <div class="flex items-center gap-3 pt-4">
+            <div class="flex items-center gap-3 pt-6">
                 <button type="button" onclick="closeInvModal()" class="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] tracking-widest uppercase">Batal</button>
-                <button type="submit" id="inv-btn-save" class="flex-[2] py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] tracking-widest uppercase shadow-xl active:scale-95 transition-all">Simpan Data</button>
+                <button type="submit" id="inv-btn-save" class="flex-[2] py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] tracking-widest uppercase shadow-xl active:scale-95 transition-all">Simpan Perubahan</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    // PENTING: Ganti dengan URL Web App hasil Deploy Google Script Anda
     const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
     let inventoryItems = [];
 
+    /**
+     * Load Data Inventori (Standar & Turbo)
+     */
     async function loadInventoriData() {
         const body = document.getElementById('inv-table-body');
+        const icon = document.getElementById('refresh-icon');
+        
+        if(icon) icon.classList.add('fa-spin');
+
         try {
-            // Turbo Sync: Gunakan getMasterData jika tersedia, atau getInventori
+            // Kita coba panggil getInventori atau getMasterData
             const res = await fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'getInventori' }) 
@@ -123,16 +136,29 @@
                 inventoryItems = result.data;
                 renderInvTable(inventoryItems);
                 updateInvStats(inventoryItems);
+            } else {
+                throw new Error("Data Error");
             }
         } catch (e) {
-            body.innerHTML = `<tr><td colspan="5" class="px-8 py-10 text-center text-rose-500 font-bold uppercase text-[10px]">Gagal terhubung ke database cloud</td></tr>`;
+            body.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-8 py-20 text-center">
+                        <div class="flex flex-col items-center gap-3 text-rose-500">
+                            <i class="fas fa-cloud-slash text-3xl"></i>
+                            <p class="text-[10px] font-black uppercase tracking-widest">Koneksi Database Terputus</p>
+                            <button onclick="loadInventoriData()" class="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg text-[9px] font-black">COBA LAGI</button>
+                        </div>
+                    </td>
+                </tr>`;
+        } finally {
+            if(icon) icon.classList.remove('fa-spin');
         }
     }
 
     function renderInvTable(data) {
         const body = document.getElementById('inv-table-body');
-        if(data.length === 0) {
-            body.innerHTML = `<tr><td colspan="5" class="px-8 py-10 text-center text-slate-400 font-bold uppercase text-[10px]">Belum ada bahan baku terdaftar</td></tr>`;
+        if(!data || data.length === 0) {
+            body.innerHTML = `<tr><td colspan="5" class="px-8 py-20 text-center text-slate-300 font-bold uppercase text-[10px] tracking-widest">Belum ada bahan baku di database</td></tr>`;
             return;
         }
 
@@ -142,23 +168,23 @@
                 <tr class="hover:bg-slate-50/50 transition-colors group">
                     <td class="px-8 py-5">
                         <p class="text-sm font-black text-slate-800 uppercase tracking-tight">${item.nama_bahan}</p>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: ${item.id}</p>
+                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-1">ID: ${item.id}</p>
                     </td>
                     <td class="px-8 py-5 text-center">
-                        <p class="text-sm font-black ${isLow ? 'text-rose-600' : 'text-slate-700'} tabular-nums">${item.stok}</p>
+                        <p class="text-sm font-black ${isLow ? 'text-rose-600 animate-pulse' : 'text-slate-700'} tabular-nums">${item.stok}</p>
                     </td>
                     <td class="px-8 py-5">
                         <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${item.satuan}</span>
                     </td>
                     <td class="px-8 py-5 text-center">
-                        <span class="px-3 py-1 rounded-full ${isLow ? 'bg-rose-50 text-rose-500 animate-pulse' : 'bg-emerald-50 text-emerald-600'} text-[8px] font-black uppercase tracking-widest">
+                        <span class="px-3 py-1 rounded-full ${isLow ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-600'} text-[8px] font-black uppercase tracking-widest shadow-sm">
                             ${isLow ? 'Restock' : 'Aman'}
                         </span>
                     </td>
                     <td class="px-8 py-5 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <button onclick="editInv('${item.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all flex items-center justify-center text-xs"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteInv('${item.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all flex items-center justify-center text-xs"><i class="fas fa-trash"></i></button>
+                            <button onclick="editInv('${item.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition-all flex items-center justify-center text-xs"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteInv('${item.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all flex items-center justify-center text-xs"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -169,8 +195,8 @@
     function filterInventori() {
         const query = document.getElementById('inv-search').value.toLowerCase();
         const filtered = inventoryItems.filter(item => 
-            item.nama_bahan.toLowerCase().includes(query) || 
-            item.id.toString().toLowerCase().includes(query)
+            (item.nama_bahan || "").toLowerCase().includes(query) || 
+            (item.id || "").toString().toLowerCase().includes(query)
         );
         renderInvTable(filtered);
     }
@@ -180,7 +206,7 @@
         document.getElementById('stat-low-inv').innerText = data.filter(i => parseFloat(i.stok) <= parseFloat(i.min_stok)).length;
     }
 
-    // Modal & Form Logic
+    // CRUD Logic
     function openAddInvModal() {
         document.getElementById('inv-modal-title').innerText = "Tambah Bahan Baru";
         document.getElementById('inv-form').reset();
@@ -191,8 +217,7 @@
     function editInv(id) {
         const item = inventoryItems.find(i => i.id == id);
         if(!item) return;
-
-        document.getElementById('inv-modal-title').innerText = "Edit Bahan Baku";
+        document.getElementById('inv-modal-title').innerText = "Edit Komoditas";
         document.getElementById('inv-id').value = item.id;
         document.getElementById('inv-nama').value = item.nama_bahan;
         document.getElementById('inv-stok').value = item.stok;
@@ -231,15 +256,15 @@
                 loadInventoriData();
             }
         } catch (err) {
-            alert("Kesalahan sinkronisasi cloud.");
+            alert("Gagal sinkron dengan cloud.");
         } finally {
             btn.disabled = false;
-            btn.innerHTML = "Simpan Data";
+            btn.innerHTML = "Simpan Perubahan";
         }
     });
 
     async function deleteInv(id) {
-        if(!confirm("Hapus bahan baku ini dari inventori?")) return;
+        if(!confirm("Hapus bahan baku ini secara permanen?")) return;
         try {
             const res = await fetch(API_URL, { 
                 method: 'POST', 
@@ -247,9 +272,9 @@
             });
             const result = await res.json();
             if(result.status === 'success') loadInventoriData();
-        } catch (e) { alert("Gagal menghapus data."); }
+        } catch (e) { alert("Penghapusan gagal."); }
     }
 
-    // Load awal
+    // Inisialisasi awal
     loadInventoriData();
 </script>
