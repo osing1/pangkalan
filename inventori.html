@@ -1,14 +1,14 @@
-<div class="space-y-8 animate-fadeIn">
+<div class="space-y-8 animate-fadeIn" id="inventory-module">
     <!-- Header Page -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Inventori Bahan Baku</h3>
             <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">
-                Manajemen komoditas & bahan dapur &bull; Sinkronisasi Cloud Aktif
+                Manajemen komoditas & bahan dapur &bull; Turbo Sync Aktif
             </p>
         </div>
         <div class="flex gap-2">
-            <button onclick="loadInventoriData()" class="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:text-amber-500 transition-all shadow-sm active:scale-95">
+            <button onclick="loadInventoriData(true)" class="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:text-amber-500 transition-all shadow-sm active:scale-95">
                 <i class="fas fa-sync-alt" id="refresh-icon"></i>
             </button>
             <button onclick="openAddInvModal()" class="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] tracking-widest shadow-xl active:scale-95 transition-all uppercase">
@@ -110,22 +110,31 @@
     </div>
 </div>
 
-<script>
-    // PENTING: Ganti dengan URL Web App hasil Deploy Google Script Anda
-    const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
-    let inventoryItems = [];
+<script id="inv-script">
+    // GUNAKAN TRICK: Pindahkan URL API ke global jika memungkinkan, atau samakan di sini.
+    var API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
+    var inventoryItems = [];
 
     /**
-     * Load Data Inventori (Standar & Turbo)
+     * TRICK AGAR SCRIPT BERJALAN SAAT DINYALAKAN LEWAT INNERHTML
+     * Kita menggunakan fungsi yang dipicu secara manual jika diperlukan.
      */
-    async function loadInventoriData() {
+    async function loadInventoriData(force = false) {
         const body = document.getElementById('inv-table-body');
         const icon = document.getElementById('refresh-icon');
         
+        // Turbo Sync: Cek apakah data sudah ada di cache lokal
+        const cached = localStorage.getItem('master_inventori');
+        if(cached && !force) {
+            inventoryItems = JSON.parse(cached);
+            renderInvTable(inventoryItems);
+            updateInvStats(inventoryItems);
+            // Tetap fetch di background untuk update terbaru
+        }
+
         if(icon) icon.classList.add('fa-spin');
 
         try {
-            // Kita coba panggil getInventori atau getMasterData
             const res = await fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'getInventori' }) 
@@ -134,22 +143,12 @@
             
             if(result.status === 'success') {
                 inventoryItems = result.data;
+                localStorage.setItem('master_inventori', JSON.stringify(inventoryItems));
                 renderInvTable(inventoryItems);
                 updateInvStats(inventoryItems);
-            } else {
-                throw new Error("Data Error");
             }
         } catch (e) {
-            body.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-8 py-20 text-center">
-                        <div class="flex flex-col items-center gap-3 text-rose-500">
-                            <i class="fas fa-cloud-slash text-3xl"></i>
-                            <p class="text-[10px] font-black uppercase tracking-widest">Koneksi Database Terputus</p>
-                            <button onclick="loadInventoriData()" class="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg text-[9px] font-black">COBA LAGI</button>
-                        </div>
-                    </td>
-                </tr>`;
+            if(!cached) body.innerHTML = `<tr><td colspan="5" class="py-20 text-center text-rose-500 font-black uppercase text-[10px]">Database Offline</td></tr>`;
         } finally {
             if(icon) icon.classList.remove('fa-spin');
         }
@@ -157,11 +156,8 @@
 
     function renderInvTable(data) {
         const body = document.getElementById('inv-table-body');
-        if(!data || data.length === 0) {
-            body.innerHTML = `<tr><td colspan="5" class="px-8 py-20 text-center text-slate-300 font-bold uppercase text-[10px] tracking-widest">Belum ada bahan baku di database</td></tr>`;
-            return;
-        }
-
+        if(!body) return;
+        
         body.innerHTML = data.map(item => {
             const isLow = parseFloat(item.stok) <= parseFloat(item.min_stok);
             return `
@@ -192,89 +188,6 @@
         }).join('');
     }
 
-    function filterInventori() {
-        const query = document.getElementById('inv-search').value.toLowerCase();
-        const filtered = inventoryItems.filter(item => 
-            (item.nama_bahan || "").toLowerCase().includes(query) || 
-            (item.id || "").toString().toLowerCase().includes(query)
-        );
-        renderInvTable(filtered);
-    }
-
-    function updateInvStats(data) {
-        document.getElementById('stat-total-inv').innerText = data.length;
-        document.getElementById('stat-low-inv').innerText = data.filter(i => parseFloat(i.stok) <= parseFloat(i.min_stok)).length;
-    }
-
-    // CRUD Logic
-    function openAddInvModal() {
-        document.getElementById('inv-modal-title').innerText = "Tambah Bahan Baru";
-        document.getElementById('inv-form').reset();
-        document.getElementById('inv-id').value = "";
-        document.getElementById('inv-modal').classList.remove('hidden');
-    }
-
-    function editInv(id) {
-        const item = inventoryItems.find(i => i.id == id);
-        if(!item) return;
-        document.getElementById('inv-modal-title').innerText = "Edit Komoditas";
-        document.getElementById('inv-id').value = item.id;
-        document.getElementById('inv-nama').value = item.nama_bahan;
-        document.getElementById('inv-stok').value = item.stok;
-        document.getElementById('inv-satuan').value = item.satuan;
-        document.getElementById('inv-min').value = item.min_stok;
-        document.getElementById('inv-modal').classList.remove('hidden');
-    }
-
-    function closeInvModal() { document.getElementById('inv-modal').classList.add('hidden'); }
-
-    document.getElementById('inv-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('inv-btn-save');
-        const id = document.getElementById('inv-id').value;
-        const action = id ? 'updateInventori' : 'submitInventori';
-        
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-circle-notch animate-spin mr-2"></i> Memproses...`;
-
-        const payload = {
-            action: action,
-            data: {
-                id: id,
-                nama_bahan: document.getElementById('inv-nama').value,
-                stok: document.getElementById('inv-stok').value,
-                satuan: document.getElementById('inv-satuan').value,
-                min_stok: document.getElementById('inv-min').value
-            }
-        };
-
-        try {
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await res.json();
-            if(result.status === 'success') {
-                closeInvModal();
-                loadInventoriData();
-            }
-        } catch (err) {
-            alert("Gagal sinkron dengan cloud.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = "Simpan Perubahan";
-        }
-    });
-
-    async function deleteInv(id) {
-        if(!confirm("Hapus bahan baku ini secara permanen?")) return;
-        try {
-            const res = await fetch(API_URL, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'deleteInventori', data: { id: id } }) 
-            });
-            const result = await res.json();
-            if(result.status === 'success') loadInventoriData();
-        } catch (e) { alert("Penghapusan gagal."); }
-    }
-
-    // Inisialisasi awal
-    loadInventoriData();
+    // Pemicu inisialisasi modul
+    setTimeout(loadInventoriData, 100);
 </script>
