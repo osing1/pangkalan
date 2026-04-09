@@ -123,8 +123,8 @@
 
 <script>
     /**
-     * MENGGUNAKAN GLOBAL SCOPE ASSIGNMENT
-     * Agar fungsi tetap bisa diakses meskipun script dimuat lewat innerHTML
+     * PERBAIKAN: Fungsi didaftarkan langsung ke window
+     * Ini menjamin tombol onclick dapat menemukan fungsi tersebut
      */
     window.API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
     window.pegawaiList = [];
@@ -134,7 +134,7 @@
         const icon = document.getElementById('pegawai-refresh-icon');
         if(!body) return;
 
-        // 1. Cek Cache
+        // 1. Cek Cache Lokal
         const cached = localStorage.getItem('master_pegawai');
         if(cached && !force) {
             window.pegawaiList = JSON.parse(cached);
@@ -195,7 +195,7 @@
                 <td class="px-8 py-5 text-right">
                     <div class="flex items-center justify-end gap-2">
                         <button onclick="window.editPegawai('${p.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition-all flex items-center justify-center text-xs"><i class="fas fa-user-edit"></i></button>
-                        <button onclick="window.deletePegawai('${p.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all flex items-center justify-center text-xs"><i class="fas fa-user-minus"></i></button>
+                        <button onclick="window.deletePegawai('${p.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-100 transition-all flex items-center justify-center text-xs"><i class="fas fa-user-minus"></i></button>
                     </div>
                 </td>
             </tr>
@@ -242,41 +242,44 @@
         } catch (e) { alert("Penghapusan gagal."); }
     };
 
-    // Form Submit Handler
-    document.getElementById('pegawai-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('pegawai-btn-save');
-        const id = document.getElementById('pegawai-id-hidden').value;
-        
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-circle-notch animate-spin mr-2"></i> Memproses...`;
+    // Handler Form Submit
+    const form = document.getElementById('pegawai-form');
+    if(form) {
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('pegawai-btn-save');
+            const id = document.getElementById('pegawai-id-hidden').value;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-circle-notch animate-spin mr-2"></i> Memproses...`;
 
-        const payload = {
-            action: 'submitPegawai',
-            data: {
-                id: id,
-                nama: document.getElementById('pegawai-nama').value,
-                posisi: document.getElementById('pegawai-posisi').value,
-                pin: document.getElementById('pegawai-pin').value,
-                status: document.getElementById('pegawai-status').value
+            const payload = {
+                action: 'submitPegawai',
+                data: {
+                    id: id,
+                    nama: document.getElementById('pegawai-nama').value,
+                    posisi: document.getElementById('pegawai-posisi').value,
+                    pin: document.getElementById('pegawai-pin').value,
+                    status: document.getElementById('pegawai-status').value
+                }
+            };
+
+            try {
+                const res = await fetch(window.API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    window.closePegawaiModal();
+                    window.loadPegawaiData(true);
+                }
+            } catch (err) {
+                alert("Sinkronisasi gagal.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "Simpan Data";
             }
         };
+    }
 
-        try {
-            const res = await fetch(window.API_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await res.json();
-            if(result.status === 'success') {
-                window.closePegawaiModal();
-                window.loadPegawaiData(true);
-            }
-        } catch (err) {
-            alert("Sinkronisasi gagal.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = "Simpan Data";
-        }
-    });
-
-    // Pemicu otomatis
-    setTimeout(() => window.loadPegawaiData(), 200);
+    // Pemicu inisialisasi manual
+    if(window.loadPegawaiData) window.loadPegawaiData();
 </script>
