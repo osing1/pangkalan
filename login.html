@@ -77,6 +77,21 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbwmI9kBYFGuOPH9cnwMK9wuGuYSZcto_EyIW0N2zDTasuW8gkZ8k7PCeVS_PYyzvRgfNg/exec";
         let currentPin = "";
 
+        // Check if session already exists on load
+        window.onload = () => {
+            const session = localStorage.getItem('user_session');
+            if (session) {
+                const userData = JSON.parse(session);
+                // Check if session is not older than 12 hours
+                const now = new Date().getTime();
+                if (now - userData.timestamp < (12 * 60 * 60 * 1000)) {
+                    window.location.href = "admin.html";
+                } else {
+                    localStorage.removeItem('user_session');
+                }
+            }
+        };
+
         function pressKey(num) {
             if (currentPin.length < 6) {
                 currentPin += num;
@@ -116,7 +131,6 @@
             overlay.classList.remove('hidden');
 
             try {
-                // Ambil data semua pegawai dari Google Sheets
                 const res = await fetch(API_URL, { 
                     method: 'POST', 
                     body: JSON.stringify({ action: 'getPegawai' }) 
@@ -124,15 +138,13 @@
                 const result = await res.json();
 
                 if (result.status === 'success') {
-                    // Cari pegawai yang PIN-nya cocok
                     const user = result.data.find(p => p.pin == currentPin);
 
                     if (user) {
-                        // Simpan sesi login di localStorage
                         localStorage.setItem('user_session', JSON.stringify({
                             id: user.id,
                             nama: user.nama,
-                            role: user.posisi, // 'Owner', 'Kasir', 'Koki', 'Waiter'
+                            role: user.posisi, 
                             timestamp: new Date().getTime()
                         }));
 
@@ -156,9 +168,6 @@
                 }, 500);
             }
         }
-
-        // Hapus sesi lama saat buka login
-        localStorage.removeItem('user_session');
     </script>
 </body>
 </html>
